@@ -22,7 +22,7 @@ const InvoiceDetail = mongoose.Schema({
 });
 
 const Invoice = mongoose.Schema({
-    number: { type: String, required: true },
+    billno: { type: String, required: true },
     date: { type: Date, default: Date.now },
     custid: { type: String, required: true },
     total: { type: Number },
@@ -34,4 +34,22 @@ const Invoice = mongoose.Schema({
     details: { type: [InvoiceDetail] }
 });
 
+function validateInvoice(invoice) {
+    const invoiceSchema = {
+        billno: Joi.string().required(),
+        date: Joi.date().required(),
+        custid: Joi.string().required(),
+        total: Joi.number(),
+        discount: Joi.number(),
+        discountamount: Joi.number(),
+        totaltax: Joi.number(),
+        pkgdly: Joi.number(),
+        finalamount: Joi.number(),
+        details: Joi.required()
+    }
+
+    return Joi.validate(invoice, invoiceSchema);
+}
+
 module.exports = mongoose.model('Invoice', Invoice);
+exports.validate = validateInvoice;
