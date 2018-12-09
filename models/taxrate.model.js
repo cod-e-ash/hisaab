@@ -1,3 +1,4 @@
+const Joi = require('joi');
 const mongoose = require('mongoose');
 
 const TaxRate = mongoose.Schema({
@@ -9,10 +10,10 @@ function validateTaxRate(taxrate) {
     const taxRateSchema = {
         name: Joi.string().required(),
         rate: Joi.number().required()
-    }
+    };
 
     return Joi.validate(taxrate, taxRateSchema);
-}
+};
 
-exports = mongoose.model('TaxRate', TaxRate);
-exports.validate = validateTaxRate;
+exports.TaxRate = mongoose.model('TaxRate', TaxRate);
+exports.validateTaxRate = validateTaxRate;

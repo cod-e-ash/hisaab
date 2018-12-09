@@ -11,7 +11,7 @@ const Product = mongoose.Schema({
     unit: { type: String },
     price: { type: Number, required: true },
     margin: { type: Number, required: true },
-    taxRate: { type: [String] }
+    taxrate: { type: [String] }
 });
 
 function validateProduct(product) {
