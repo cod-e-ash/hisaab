@@ -1,5 +1,6 @@
 const express = require('express');
 const { Product, validate, validateId } = require('../models/product.model');
+const auth = require('../middlewares/auth');
 
 const router = express.Router();
 
@@ -22,7 +23,7 @@ router.get('/:id', async (req, res) => {
     }
 });
 
-router.post('/', async (req, res) => {
+router.post('/', auth, async (req, res) => {
     try {
         const { error } = validate(req.body);
         if (error) return res.status(400).send(error.details[0].message);
@@ -48,7 +49,7 @@ router.post('/', async (req, res) => {
     }
 });
 
-router.put('/:id', async (req, res) => {
+router.put('/:id', auth, async (req, res) => {
     try {
         error = validateId(req.params.id);
         if (error) return res.status(400).send(error.message);
@@ -76,7 +77,7 @@ router.put('/:id', async (req, res) => {
     }
 });
 
-router.delete('/:id', async (req,res) => {
+router.delete('/:id', auth, async (req,res) => {
     try {
         error = validateId(req.params.id);
         if (error) return res.status(400).send(error.message); 

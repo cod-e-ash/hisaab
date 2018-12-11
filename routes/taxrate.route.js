@@ -1,5 +1,6 @@
 const express = require('express');
 const { TaxRate, validateTaxRate } = require('../models/taxrate.model');
+const auth = require('../middlewares/auth');
 
 const router = express.Router();
 
@@ -26,19 +27,7 @@ router.get('/:name', async (req, res) => {
     return;
 });
 
-router.delete('/:id', async (req, res) => {
-    try {
-        taxrates = await TaxRate.deleteOne({"_id": req.params.id});
-        if (!taxrates) return res.status(404).send('Tax Rate not found!');
-        res.status(200).send("Tax Rate deleted!");
-    }
-    catch {
-        res.status(500).send("No Tax Rates in database");
-    }
-    return;
-});
-
-router.post('/', async (req, res) => {
+router.post('/', auth, async (req, res) => {
     const { error } = validateTaxRate(req.body);
     if (error) return res.status(400).send(error.details[0].message);
     
@@ -51,7 +40,7 @@ router.post('/', async (req, res) => {
     res.status(201).send(taxrate);
 });
 
-router.put('/:name', async (req, res) => {
+router.put('/:name', auth, async (req, res) => {
     const { error } = validateTaxRate(req.body);
     if (error) return res.status(400).send(error.details[0].message);
 
@@ -64,6 +53,18 @@ router.put('/:name', async (req, res) => {
 
     if (!result) return res.status(404).send("Record not found!");
     res.send("Record Updated!");
+});
+
+router.delete('/:id', auth, async (req, res) => {
+    try {
+        taxrates = await TaxRate.deleteOne({"_id": req.params.id});
+        if (!taxrates) return res.status(404).send('Tax Rate not found!');
+        res.status(200).send("Tax Rate deleted!");
+    }
+    catch {
+        res.status(500).send("No Tax Rates in database");
+    }
+    return;
 });
 
 

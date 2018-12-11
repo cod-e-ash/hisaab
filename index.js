@@ -1,4 +1,3 @@
-const config = require('config');
 const express = require('express');
 const helmet = require('helmet');
 const connectDB = require('./startup');
@@ -6,6 +5,9 @@ const taxRoutes = require('./routes/taxrate.route');
 const productRoutes = require('./routes/product.route');
 const customerRoutes = require('./routes/customer.route');
 const invoiceRoutes = require('./routes/invoice.route');
+const userRoutes = require('./routes/user.route');
+const authRoutes = require('./routes/auth.route');
+
 const app = express();
 
 connectDB();
@@ -27,6 +29,8 @@ app.use('/api/taxrates', taxRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/customers', customerRoutes);
 app.use('/api/invoices', invoiceRoutes);
+app.use('/api/users', userRoutes);
+app.use('/api/auth', authRoutes);
 
 const port = process.env.PORT || 3000
 

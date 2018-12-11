@@ -1,6 +1,7 @@
 const express = require('express');
 const { Invoice, validate, validateId } = require('../models/invoice.model');
 const debug = require('debug')('app:invoice');
+const auth = require('../middlewares/auth');
 
 const router = express.Router();
 
@@ -29,7 +30,7 @@ router.get('/:id', async (req, res) => {
     }
 });
 
-router.post('/', async (req, res) => {
+router.post('/', auth, async (req, res) => {
     try {
         const { error } = validate(req.body);
         if (error) return res.status(400).send(error.details[0].message);
@@ -56,7 +57,7 @@ router.post('/', async (req, res) => {
     }
 });
 
-router.put('/:id', async (req, res) => {
+router.put('/:id', auth, async (req, res) => {
     try {
         const err = validateId(req.params.id);
         if (err) return res.status(404).send("Invalid Invoice Id!");
@@ -86,7 +87,7 @@ router.put('/:id', async (req, res) => {
     }
 });
 
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', auth, async (req, res) => {
     try {
         const error = validateId(req.params.id);
         if (error) return res.status(404).send("Invalid Invoice Id!");
