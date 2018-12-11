@@ -1,4 +1,6 @@
 const mongoose = require('mongoose');
+const Joi = require('joi');
+const validateObjectId = require('../helpers/validateObjectId');
 
 const Customer = mongoose.Schema({
     name: {type: String, required: true, min: 5 },
@@ -16,9 +18,13 @@ function validateCustomer(customer) {
         gstn: Joi.string(),
         pan: Joi.string()
     }
-
     return Joi.validate(customer, customerSchema);
 }
 
-module.exports = mongoose.model('Customer', Customer);
-exports.validate = validateCustomer;
+function validateId(customerId) {
+    return validateObjectId(customerId, "Customer");
+}
+
+module.exports.Customer = mongoose.model('Customer', Customer);
+module.exports.validate = validateCustomer;
+module.exports.validateId = validateId;

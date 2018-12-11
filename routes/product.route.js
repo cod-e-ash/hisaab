@@ -1,5 +1,5 @@
 const express = require('express');
-const { Product, validate } = require('../models/product.model');
+const { Product, validate, validateId } = require('../models/product.model');
 
 const router = express.Router();
 
@@ -8,30 +8,86 @@ router.get('/', async (req, res) => {
     res.status(200).send(products);
 });
 
-router.post('/', async (req, res) => {
-    const error = validate(req.body);
-    if (error) return res.status(400).send(error.details[0].message);
-    
-    const product = Product({
-        name: req.body.name,
-        company: req.body.company,
-        code: req.body.code,
-        hsn: req.body.hsn,
-        variant: req.body.variant,
-        size: req.body.size,
-        unit: req.body.unit,
-        price: req.body.price,
-        margin: req.body.margin,
-        taxrate: req.body.taxrate
-    });
+router.get('/:id', async (req, res) => {
+    try {
+        error = validateId(req.params.id);
+        if (error) return res.status(400).send(error); 
 
-    product.save()
-    .then( (product) => {
-        res.status(201).send(product);
-    })
-    .catch( error => {
+        const product = await Product.findById(req.params.id);
+        if (!product) return res.status(400).send("Product not found");
+        res.status(200).send(product);
+    }
+    catch(error) {
         res.status(500).send(error);
-    });
+    }
 });
 
-exports.router = router;
+router.post('/', async (req, res) => {
+    try {
+        const { error } = validate(req.body);
+        if (error) return res.status(400).send(error.details[0].message);
+        
+        const product = Product({
+            name: req.body.name,
+            company: req.body.company,
+            code: req.body.code,
+            hsn: req.body.hsn,
+            variant: req.body.variant,
+            size: req.body.size,
+            unit: req.body.unit,
+            price: req.body.price,
+            margin: req.body.margin,
+            taxrate: req.body.taxrate
+        });
+        console.log(product);
+        await product.save();
+        res.status(201).send(product);
+    } 
+    catch(error) {
+        res.status(500).send(error);
+    }
+});
+
+router.put('/:id', async (req, res) => {
+    try {
+        error = validateId(req.params.id);
+        if (error) return res.status(400).send(error.message);
+
+        const old_product = await Product.findOne({"_id" : req.params.id});
+            
+        if (!old_product) return res.status(404).send("No Product Found");
+
+        old_product.name = req.body.name || old_product.name;
+        old_product.company = req.body.company || old_product.company;
+        old_product.code = req.body.code || old_product.code;
+        old_product.hsn = req.body.hsn || old_product.hsn;
+        old_product.variant = req.body.variant || old_product.variant;
+        old_product.size = req.body.size || old_product.size;
+        old_product.unit = req.body.unit || old_product.unit;
+        old_product.price = req.body.price || old_product.price;
+        old_product.margin = req.body.margin || old_product.margin;
+        old_product.taxrate = req.body.taxrate || old_product.taxrate;
+
+        await old_product.save();
+        res.status(200).send(old_product);
+    } 
+    catch(error) {
+        res.status(500).send(error);
+    }
+});
+
+router.delete('/:id', async (req,res) => {
+    try {
+        error = validateId(req.params.id);
+        if (error) return res.status(400).send(error.message); 
+        
+        const product = await Product.findByIdAndRemove(req.params.id);
+        if (!product) return res.status(400).send('Product not found!');
+        res.status(200).send("Record deleted!");
+    }
+    catch(err) {
+        res.status(500).send("Internal server error!");
+    }
+});
+
+module.exports = router;

@@ -4,12 +4,12 @@ const Joi = require('joi');
 const User = mongoose.Schema({
     name: {type: String, required: true},
     role: {type:String, required: true},
-    pass: {type: String, required:true}
+    pass: {type: String, required:true, unique: true}
 });
 
 function validateUser(user) {
     const UserSchema = {
-        name: Joi.string().required().min(4),
+        name: Joi.string().required().unique().min(4),
         role: Joi.string().required(),
         pass: Joi.string().required()
     }

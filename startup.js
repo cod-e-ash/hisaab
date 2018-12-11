@@ -6,11 +6,19 @@ module.exports = function connectDB() {
     mongoose.set('useFindAndModify', false);
     mongoose.set('useCreateIndex', true);
 
-    mongoose.connect('mongodb+srv://invo:' + config.get('mongo_pass') + '@cluster0-zkcca.mongodb.net/hisaab')
-    .then(() => {
-        console.log('Database Connected');
-    })
-    .catch(() => {
-        console.log('Database connection failed');
-    });
+    try {
+        pass = config.get('mongo_pass');
+        mongoose.connect('mongodb+srv://invo:' + pass + '@cluster0-zkcca.mongodb.net/hisaab')
+        .then(() => {
+            console.log('Database Connected');
+        })
+        .catch((err) => {
+            console.log('Database connection failed');
+            process.exit(1);
+        });
+    }
+    catch(err) {
+        console.log("Password for database not set!");
+        process.exit(1);
+    }
 }

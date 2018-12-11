@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const Joi = require('joi');
+const validateObjectId = require('../helpers/validateObjectId');
 
 const Product = mongoose.Schema({
     name: { type: String, required: true },
@@ -24,11 +25,17 @@ function validateProduct(product) {
         size: Joi.string(),
         unit: Joi.string(),
         price: Joi.number().required(),
-        margin: Joi.number()
+        margin: Joi.number(),
+        taxrate: Joi.array().optional()
     }
 
     return Joi.validate(product, productSchema);
 }
 
-module.exports = mongoose.model('Product', Product);
-exports.validate = validateProduct; 
+function validateId(objectId) {
+    return validateObjectId(objectId,"Product");
+}
+
+module.exports.Product = mongoose.model('Product', Product);
+module.exports.validate = validateProduct; 
+module.exports.validateId = validateId; 
