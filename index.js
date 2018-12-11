@@ -1,3 +1,4 @@
+require('express-async-errors');
 const express = require('express');
 const helmet = require('helmet');
 const connectDB = require('./startup');
@@ -7,13 +8,21 @@ const customerRoutes = require('./routes/customer.route');
 const invoiceRoutes = require('./routes/invoice.route');
 const userRoutes = require('./routes/user.route');
 const authRoutes = require('./routes/auth.route');
+const errorHandler = require('./middlewares/error-handler');
+const logger = require('./helpers/logger');
 
 const app = express();
+
+process.on("uncaughtException", (error) => {
+    logger.error(error.message, error);
+});
+process.on("unhandledRejection", (error) => {
+    throw error;
+});
 
 connectDB();
 
 // Express Config Settings
-
 app.use(express.json());
 app.use(express.urlencoded({extended: true}));
 app.use(helmet());
@@ -31,6 +40,8 @@ app.use('/api/customers', customerRoutes);
 app.use('/api/invoices', invoiceRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/auth', authRoutes);
+
+app.use(errorHandler);
 
 const port = process.env.PORT || 3000
 
