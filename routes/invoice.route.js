@@ -30,7 +30,7 @@ router.get('/:id', async (req, res) => {
 });
 
 router.post('/', async (req, res) => {
-    // try {
+    try {
         const { error } = validate(req.body);
         if (error) return res.status(400).send(error.details[0].message);
 
@@ -49,11 +49,55 @@ router.post('/', async (req, res) => {
 
         await invoice.save();
         res.status(201).send(invoice);
-    // }
-    // catch(error) {
-    //     debug(error);
-    //     res.status(500).send("Internal server error!");
-    // }
+    }
+    catch(error) {
+        debug(error);
+        res.status(500).send("Internal server error!");
+    }
+});
+
+router.put('/:id', async (req, res) => {
+    try {
+        const err = validateId(req.params.id);
+        if (err) return res.status(404).send("Invalid Invoice Id!");
+
+        const { error } = validate(req.body);
+        if (error) return res.status(400).send("Invalid data!");
+
+        let invoice = await Invoice.findOne({"_id":req.params.id});
+        if (!invoice) return res.status(400).send("Invoice not found!");
+
+        invoice.billno = req.body.billno || invoice.billno;
+        invoice.date = req.body.date || invoice.date;
+        invoice.custid = req.body.custid || invoice.custid;
+        invoice.total = req.body.total || invoice.total;
+        invoice.discount = req.body.discount || invoice.discount;
+        invoice.discountamount = req.body.discountamount || invoice.discountamount;
+        invoice.totaltax = req.body.totaltax || invoice.totaltax;
+        invoice.pkgdly = req.body.pkgdly || invoice.pkgdly;
+        invoice.finalamount = req.body.finalamount || invoice.finalamount;
+        invoice.details = req.body.details || invoice.details;
+
+        await invoice.save();
+        res.status(200).send(invoice);
+    }
+    catch(error) {
+        res.status(500).send("Internal server error!");
+    }
+});
+
+router.delete('/:id', async (req, res) => {
+    try {
+        const error = validateId(req.params.id);
+        if (error) return res.status(404).send("Invalid Invoice Id!");
+
+        const invoice = await Invoice.findByIdAndRemove(req.params.id);
+        if (!invoice) res.status(400).send("Invoice not found!");
+        res.status(200).send(invoice);
+    }
+    catch(error) {
+        res.status(500).send("Internal server error!");
+    }
 });
 
 module.exports = router;
