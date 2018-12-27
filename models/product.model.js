@@ -3,12 +3,12 @@ const Joi = require('joi');
 const validateObjectId = require('../helpers/validateObjectId');
 
 const Product = mongoose.Schema({
+    code: { type: String },
     name: { type: String, required: true },
     company: { type: String, required: true },
-    code: { type: String },
     hsn: { type: String },
-    variant: { type: String },
     size: { type: String },
+    variant: { type: String },
     unit: { type: String },
     price: { type: Number, required: true },
     margin: { type: Number, required: true },
