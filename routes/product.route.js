@@ -32,9 +32,9 @@ router.post('/', auth, async (req, res) => {
         unit: req.body.unit,
         price: req.body.price,
         margin: req.body.margin,
+        status: true,
         taxrate: req.body.taxrate
     });
-    console.log(product);
     await product.save();
     res.status(201).send(product);
 });
@@ -56,6 +56,7 @@ router.put('/:id', auth, async (req, res) => {
     old_product.unit = req.body.unit || old_product.unit;
     old_product.price = req.body.price || old_product.price;
     old_product.margin = req.body.margin || old_product.margin;
+    old_product.status = req.body.status || old_product.status;
     old_product.taxrate = req.body.taxrate || old_product.taxrate;
 
     await old_product.save();

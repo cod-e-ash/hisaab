@@ -12,7 +12,8 @@ const Product = mongoose.Schema({
     unit: { type: String },
     price: { type: Number, required: true },
     margin: { type: Number, required: true },
-    taxrate: { type: [String] }
+    status: { type: Boolean},
+    taxrate: { type: String }
 });
 
 function validateProduct(product) {
@@ -20,13 +21,14 @@ function validateProduct(product) {
         name: Joi.string().min(3).max(100).required(),
         company: Joi.string().min(3).max(100).required(),
         code: Joi.string(),
-        hsn: Joi.string(),
-        variant: Joi.string(),
-        size: Joi.string(),
-        unit: Joi.string(),
+        hsn: Joi.string().optional(),
+        variant: Joi.string().allow('').optional(),
+        size: Joi.string().allow('').optional(),
+        unit: Joi.string().allow('').optional(),
         price: Joi.number().required(),
-        margin: Joi.number(),
-        taxrate: Joi.array().optional()
+        margin: Joi.number().optional(),
+        status: Joi.boolean(),
+        taxrate: Joi.string().required()
     }
 
     return Joi.validate(product, productSchema);
