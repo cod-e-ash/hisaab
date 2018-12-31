@@ -1,11 +1,50 @@
 const express = require('express');
 const { Product, validate, validateId } = require('../models/product.model');
 const auth = require('../middlewares/auth');
+const faker = require('faker');
 
 const router = express.Router();
 
 router.get('/', async (req, res) => {
-    const products = await Product.find();
+    let searchQry = {};
+    // If Company provided
+    if (req.query.company) {
+        searchQry['company'] = {$regex : '.*'+req.query.company+'.*', $options: 'i'};
+    }
+    // If Product provided
+    if (req.query.name) {
+        searchQry['name'] = {$regex : '.*'+req.query.name+'.*', $options: 'i'};
+    }
+    // If only active products
+    if (req.query.active) {
+        searchQry['active'] = {$regex : '.*'+req.query.name+'.*', $options: 'i'};
+    }
+    
+    // const searchQry2 = JSON.parse(JSON.stringify(searchQry));
+    // console.log(searchQry, searchQry2);
+
+    // const totalRecs = await Product.countDocuments(searchQry);
+    // Check if any records
+    // if (totalRecs === 0) {
+    //     return res.status(404).send("No Records Found");
+    // }
+
+    // const totalPages = parseInt(totalRecs / 10)+1;
+    // const curPage = +req.query.page || 1;
+
+    // Check of page number
+    // if (curPage > totalPages || curPage < 1) {
+    //     return res.status(404).send("Page Not Found");
+    // }
+    
+
+    // const skipRecs = 10*(curPage-1);
+    const products = await Product
+                    .find({name: { '$regex': '.*tuna.*', '$options': 'i' }})
+                    // .skip(skipRecs)
+                    // .limit(10);
+    
+    // res.status(200).send({totalRecs: totalRecs, totalPages: totalPages, curPage: curPage, products: products});
     res.status(200).send(products);
 });
 
@@ -16,6 +55,30 @@ router.get('/:id', async (req, res) => {
     const product = await Product.findById(req.params.id);
     if (!product) return res.status(400).send("Product not found");
     res.status(200).send(product);
+});
+
+
+router.post('/fake', async (req, res) => {
+    let fake_data = [];
+    for(i=0;i<7;i++) {
+        let product = Product ({
+            name: faker.commerce.productName(),
+            company: faker.company.companyName(),
+            code: faker.random.number({min:10001, max:99999}) ,
+            hsn: faker.random.alphaNumeric(4).toUpperCase(),
+            variant: faker.commerce.productAdjective(),
+            size: faker.random.arrayElement(['','XS', 'S', 'M', 'L', 'XL', 'XXL']),
+            unit: 'pieces',
+            price: faker.commerce.price(),
+            margin: 10,
+            status: true,
+            taxrate: faker.random.arrayElement(
+                ['Excempted', 'GST@5', 'GST@8', 'GST@12', 'GST@18', 
+                'GST@28', 'IGST@5', 'IGST@8', 'IGST@12', 'IGST@18', 'IGST@28'])
+        });
+        await product.save();
+    }
+    res.status(201).send('Random Products Created!');
 });
 
 router.post('/', auth, async (req, res) => {
