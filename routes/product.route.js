@@ -7,45 +7,41 @@ const router = express.Router();
 
 router.get('/', async (req, res) => {
     let searchQry = {};
-    // If Company provided
-    if (req.query.company) {
-        searchQry['company'] = {$regex : '.*'+req.query.company+'.*', $options: 'i'};
-    }
+
     // If Product provided
     if (req.query.name) {
-        searchQry['name'] = {$regex : '.*'+req.query.name+'.*', $options: 'i'};
+        searchQry['name'] = {$regex : '.*' + req.query.name + '.*', $options: 'i'};
+    }
+    // If Company provided
+    if (req.query.company) {
+        searchQry['company'] = {$regex : '.*' + req.query.company + '.*', $options: 'i'};
     }
     // If only active products
-    if (req.query.active) {
-        searchQry['active'] = {$regex : '.*'+req.query.name+'.*', $options: 'i'};
+    if (req.query.active &&  req.query.active=='true') {
+        searchQry['status'] = true;
     }
     
-    // const searchQry2 = JSON.parse(JSON.stringify(searchQry));
-    // console.log(searchQry, searchQry2);
-
-    // const totalRecs = await Product.countDocuments(searchQry);
+    const totalRecs = await Product.countDocuments(searchQry);
     // Check if any records
-    // if (totalRecs === 0) {
-    //     return res.status(404).send("No Records Found");
-    // }
+    if (totalRecs === 0) {
+        return res.status(404).send({error: "No Records Found"});
+    }
 
-    // const totalPages = parseInt(totalRecs / 10)+1;
-    // const curPage = +req.query.page || 1;
+    const totalPages = parseInt(totalRecs / 10)+1;
+    const curPage = +req.query.page || 1;
 
     // Check of page number
-    // if (curPage > totalPages || curPage < 1) {
-    //     return res.status(404).send("Page Not Found");
-    // }
+    if (curPage > totalPages || curPage < 1) {
+        return res.status(404).send({error: "Page Not Found"});
+    }
     
-
-    // const skipRecs = 10*(curPage-1);
+    const skipRecs = 10*(curPage-1);
     const products = await Product
-                    .find({name: { '$regex': '.*tuna.*', '$options': 'i' }})
-                    // .skip(skipRecs)
-                    // .limit(10);
+                    .find(searchQry)
+                    .skip(skipRecs)
+                    .limit(10);
     
-    // res.status(200).send({totalRecs: totalRecs, totalPages: totalPages, curPage: curPage, products: products});
-    res.status(200).send(products);
+    res.status(200).send({totalRecs: totalRecs, totalPages: totalPages, curPage: curPage, products: products});
 });
 
 router.get('/:id', async (req, res) => {
@@ -119,7 +115,7 @@ router.put('/:id', auth, async (req, res) => {
     old_product.unit = req.body.unit || old_product.unit;
     old_product.price = req.body.price || old_product.price;
     old_product.margin = req.body.margin || old_product.margin;
-    old_product.status = req.body.status || old_product.status;
+    old_product.status = req.body.status === false ? false : true;
     old_product.taxrate = req.body.taxrate || old_product.taxrate;
 
     await old_product.save();
