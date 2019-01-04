@@ -17,8 +17,8 @@ router.get('/', async (req, res) => {
         searchQry['company'] = {$regex : '.*' + req.query.company + '.*', $options: 'i'};
     }
     // If only active products
-    if (!req.query.active || req.query.active==='true') {
-        searchQry['status'] = true;
+    if (!req.query.stockOpt || req.query.stockOpt==='true') {
+        searchQry['stock'] = {$gt: 0};
     }
     
     const totalRecs = await Product.countDocuments(searchQry);
@@ -53,28 +53,28 @@ router.get('/:id', async (req, res) => {
     res.status(200).send(product);
 });
 
-// router.post('/fake', async (req, res) => {
-//     let fake_data = [];
-//     for(i=0;i<7;i++) {
-//         let product = Product ({
-//             name: faker.commerce.productName(),
-//             company: faker.company.companyName(),
-//             code: faker.random.number({min:10001, max:99999}) ,
-//             hsn: faker.random.alphaNumeric(4).toUpperCase(),
-//             variant: faker.commerce.productAdjective(),
-//             size: faker.random.arrayElement(['','XS', 'S', 'M', 'L', 'XL', 'XXL']),
-//             unit: 'pieces',
-//             price: faker.commerce.price(),
-//             margin: 10,
-//             status: true,
-//             taxrate: faker.random.arrayElement(
-//                 ['Excempted', 'GST@5', 'GST@8', 'GST@12', 'GST@18', 
-//                 'GST@28', 'IGST@5', 'IGST@8', 'IGST@12', 'IGST@18', 'IGST@28'])
-//         });
-//         await product.save();
-//     }
-//     res.status(201).send('Random Products Created!');
-// });
+router.post('/fake', async (req, res) => {
+    let fake_data = [];
+    for(i=0;i<7;i++) {
+        let product = Product ({
+            name: faker.commerce.productName(),
+            company: faker.company.companyName(),
+            code: faker.random.number({min:10001, max:99999}) ,
+            hsn: faker.random.alphaNumeric(4).toUpperCase(),
+            variant: faker.commerce.productAdjective(),
+            size: faker.random.arrayElement(['','XS', 'S', 'M', 'L', 'XL', 'XXL']),
+            unit: 'pieces',
+            price: faker.commerce.price(),
+            margin: 10,
+            stock: faker.commerce.price(),
+            taxrate: faker.random.arrayElement(
+                ['Exempted', 'GST@5', 'GST@8', 'GST@12', 'GST@18', 
+                'GST@28', 'IGST@5', 'IGST@8', 'IGST@12', 'IGST@18', 'IGST@28'])
+        });
+        await product.save();
+    }
+    res.status(201).send('Random Products Created!');
+});
 
 router.post('/', auth, async (req, res) => {
     const { error } = validate(req.body);
@@ -90,7 +90,7 @@ router.post('/', auth, async (req, res) => {
         unit: req.body.unit,
         price: req.body.price,
         margin: req.body.margin,
-        status: true,
+        stock: req.body.stock || 0,
         taxrate: req.body.taxrate
     });
     await product.save();
@@ -102,7 +102,7 @@ router.put('/:id', auth, async (req, res) => {
     if (error) return res.status(400).send(error.message);
 
     const old_product = await Product.findOne({"_id" : req.params.id});
-        
+
     if (!old_product) return res.status(404).send("No Product Found");
 
     old_product.name = req.body.name || old_product.name;
@@ -114,7 +114,7 @@ router.put('/:id', auth, async (req, res) => {
     old_product.unit = req.body.unit || old_product.unit;
     old_product.price = req.body.price || old_product.price;
     old_product.margin = req.body.margin || old_product.margin;
-    old_product.status = req.body.status === false ? false : true;
+    old_product.stock = req.body.stock === 0 ? 0 : req.body.stock || old_product.stock;
     old_product.taxrate = req.body.taxrate || old_product.taxrate;
 
     await old_product.save();
