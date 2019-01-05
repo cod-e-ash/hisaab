@@ -2,13 +2,7 @@ const mongoose = require('mongoose');
 const Joi = require('joi');
 const validateObjectId = require('../helpers/validateObjectId');
 
-const Tax = mongoose.Schema({
-    name: { type: String },
-    rate: { type: Number },
-    amount: { type: Number }
-});
-
-const InvoiceDetail = mongoose.Schema({
+const OrderDetail = mongoose.Schema({
     itemno: { type: Number },
     name: { type: String },
     hsn: { type: String },
@@ -17,34 +11,30 @@ const InvoiceDetail = mongoose.Schema({
     margin: { type: Number },
     discountpercentage: { type: Number },
     discountamount: { type: Number },
-    tax: { type: [Tax] },
     rate: { type: Number },
+    taxrate: { type: String },
     taxamount: { type: Number },
     totalamount: { type: Number }
 });
 
-const Invoice = mongoose.Schema({
+const Order = mongoose.Schema({
     billno: { type: String, required: true },
     date: { type: Date, default: Date.now },
     custid: { type: String, required: true },
+    client: { type: String, required: true },
     total: { type: Number },
     discount: { type: Number, default: 0 },
     discountamount: { type: Number, default: 0 },
     totaltax: { type: Number, default: 0 },
     pkgdly: { type: Number, default: 0 },
     finalamount: { type: Number },
-    details: { type: [InvoiceDetail] }
+    status: { type: String },
+    details: { type: [OrderDetail] }
 });
 
-function validateInvoice(invoice) {
+function validateOrder(order) {
 
-    const invoiceTaxSchema = {
-        name: Joi.string(),
-        rate: Joi.number(),
-        amount: Joi.number()
-    }
-
-    const invoiceDetailSchema = {
+    const orderDetailSchema = {
         itemno: Joi.number().required(),
         name: Joi.string().required(),
         hsn : Joi.string().required(),
@@ -53,32 +43,49 @@ function validateInvoice(invoice) {
         margin: Joi.number(),
         discountpercentage: Joi.number(),
         discountamount: Joi.number(),
-        tax: Joi.array().items(Joi.object(invoiceTaxSchema)),
         rate: Joi.number().required(),
+        taxrate: Joi.string(),
         taxamount: Joi.number(),
         totalamount: Joi.number().required()
     }
     
-    const invoiceSchema = Joi.object({
+    const orderSchema = Joi.object({
         billno: Joi.string().required(),
         date: Joi.date().required(),
         custid: Joi.string().required(),
+        client: Joi.string().required(),
         total: Joi.number().required(),
         discount: Joi.number(),
         discountamount: Joi.number(),
         totaltax: Joi.number(),
         pkgdly: Joi.number(),
         finalamount: Joi.number(),
-        details: Joi.array().min(1).items(Joi.object(invoiceDetailSchema)).required()
+        status: Joi.string().default('Pending'),
+        details: Joi.array().min(1).items(Joi.object(orderDetailSchema)).required()
     });
 
-    return Joi.validate(invoice, invoiceSchema);
+    return Joi.validate(order, orderSchema);
 }
 
-function validateId(invoiceId) {
-    return validateObjectId(invoiceId, "Invoice");
+Order.virtual('calcDiscount')
+  .get(function() {
+    return this.total * (this.discount/100);
+  });
+
+Order.virtual('calcFianlAmount')
+  .get(function() {
+    return this.total - this.discountamount + this.totaltax + this.pkgdly;
+  });
+
+  Order.virtual('calcFianlAmount')
+  .get(function() {
+    return this.total - this.discountamount + this.totaltax + this.pkgdly;
+  });
+
+function validateId(orderId) {
+    return validateObjectId(orderId, "Order");
 }
 
-module.exports.Invoice = mongoose.model('Invoice', Invoice);
-module.exports.validate = validateInvoice;
+module.exports.Order = mongoose.model('Order', Order);
+module.exports.validate = validateOrder;
 module.exports.validateId = validateId;

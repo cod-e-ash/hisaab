@@ -53,28 +53,28 @@ router.get('/:id', async (req, res) => {
     res.status(200).send(product);
 });
 
-router.post('/fake', async (req, res) => {
-    let fake_data = [];
-    for(i=0;i<7;i++) {
-        let product = Product ({
-            name: faker.commerce.productName(),
-            company: faker.company.companyName(),
-            code: faker.random.number({min:10001, max:99999}) ,
-            hsn: faker.random.alphaNumeric(4).toUpperCase(),
-            variant: faker.commerce.productAdjective(),
-            size: faker.random.arrayElement(['','XS', 'S', 'M', 'L', 'XL', 'XXL']),
-            unit: 'pieces',
-            price: faker.commerce.price(),
-            margin: 10,
-            stock: faker.commerce.price(),
-            taxrate: faker.random.arrayElement(
-                ['Exempted', 'GST@5', 'GST@8', 'GST@12', 'GST@18', 
-                'GST@28', 'IGST@5', 'IGST@8', 'IGST@12', 'IGST@18', 'IGST@28'])
-        });
-        await product.save();
-    }
-    res.status(201).send('Random Products Created!');
-});
+// router.post('/fake', async (req, res) => {
+//     let fake_data = [];
+//     for(i=0;i<7;i++) {
+//         let product = Product ({
+//             name: faker.commerce.productName(),
+//             company: faker.company.companyName(),
+//             code: faker.random.number({min:10001, max:99999}) ,
+//             hsn: faker.random.alphaNumeric(4).toUpperCase(),
+//             variant: faker.commerce.productAdjective(),
+//             size: faker.random.arrayElement(['','XS', 'S', 'M', 'L', 'XL', 'XXL']),
+//             unit: 'pieces',
+//             price: faker.commerce.price(),
+//             margin: 10,
+//             stock: faker.commerce.price(),
+//             taxrate: faker.random.arrayElement(
+//                 ['Exempted', 'GST@5', 'GST@8', 'GST@12', 'GST@18', 
+//                 'GST@28', 'IGST@5', 'IGST@8', 'IGST@12', 'IGST@18', 'IGST@28'])
+//         });
+//         await product.save();
+//     }
+//     res.status(201).send('Random Products Created!');
+// });
 
 router.post('/', auth, async (req, res) => {
     const { error } = validate(req.body);

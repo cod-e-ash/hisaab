@@ -5,7 +5,7 @@ const connectDB = require('./startup');
 const taxRoutes = require('./routes/taxrate.route');
 const productRoutes = require('./routes/product.route');
 const customerRoutes = require('./routes/customer.route');
-const invoiceRoutes = require('./routes/invoice.route');
+const orderRoutes = require('./routes/order.route');
 const userRoutes = require('./routes/user.route');
 const authRoutes = require('./routes/auth.route');
 const errorHandler = require('./middlewares/error-handler');
@@ -37,7 +37,7 @@ app.use((req,res,next) => {
 app.use('/api/taxrates', taxRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/customers', customerRoutes);
-app.use('/api/invoices', invoiceRoutes);
+app.use('/api/orders', orderRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/auth', authRoutes);
 
