@@ -18,7 +18,7 @@ const OrderDetail = mongoose.Schema({
 });
 
 const Order = mongoose.Schema({
-    billno: { type: String, required: true },
+    orderno: { type: String, required: true },
     date: { type: Date, default: Date.now },
     custid: { type: String, required: true },
     client: { type: String, required: true },
@@ -50,7 +50,7 @@ function validateOrder(order) {
     }
     
     const orderSchema = Joi.object({
-        billno: Joi.string().required(),
+        orderno: Joi.string().required(),
         date: Joi.date().required(),
         custid: Joi.string().required(),
         client: Joi.string().required(),

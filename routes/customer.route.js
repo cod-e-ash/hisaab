@@ -2,11 +2,41 @@ const express = require('express');
 const {Customer, validate, validateId} = require('../models/customer.model');
 const router = express.Router();
 const auth = require('../middlewares/auth');
+const faker = require('faker');
+
 
 router.get('/', async (req, res) => {
-    const customers = await Customer.find();
-    if (!customers) return res.status(400).send("No Customer found!");
-    res.status(200).send(customers);
+    let searchQry = {};
+    // If Customer provided
+    if (req.query.name) {
+        searchQry['name'] = {$regex : '.*' + req.query.name + '.*', $options: 'i'};
+    }
+    if (req.query.type) {
+        searchQry['type'] = req.query.type;
+    } else {
+        searchQry['type'] = 'Customer';
+    }
+    const totalRecs = await Customer.countDocuments(searchQry);
+    // Check if any records
+    if (totalRecs === 0) {
+        return res.status(404).send({error: "No Records Found"});
+    }
+
+    const totalPages = Math.ceil(totalRecs / 10);
+    const curPage = +req.query.page || 1;
+
+    // Check of page number
+    if (curPage > totalPages || curPage < 1) {
+        return res.status(404).send({error: "Page Not Found"});
+    }
+    
+    const skipRecs = 10*(curPage-1);
+    const customers = await Customer
+                    .find(searchQry)
+                    .skip(skipRecs)
+                    .limit(10);
+    
+    res.status(200).send({totalRecs: totalRecs, totalPages: totalPages, curPage: curPage, customers: customers});
 });
 
 router.get('/:id', async (req, res) => {
@@ -18,13 +48,35 @@ router.get('/:id', async (req, res) => {
     res.status(200).send(customer);
 });
 
+router.post('/fake', async (req, res) => {
+    let fake_data = [];
+    for(i=0;i<7;i++) {
+        let customer = Customer ({
+            name: faker.company.companyName(),
+            phone1: faker.phone.phoneNumber(),
+            phone2: faker.random.arrayElement(['','', faker.phone.phoneNumber()]),
+            email1: faker.internet.email(),
+            email2: faker.random.arrayElement(['','', faker.internet.email()]),
+            address: faker.address.streetName(),
+            city: faker.address.city(),
+            state: faker.address.state(),
+            country: faker.address.country(),
+            zipcode: faker.address.zipCode(),
+            gstn: faker.random.alphaNumeric(11),
+            pan: faker.random.alphaNumeric(9),
+            type: faker.random.arrayElement(['Customer', 'Supplier'])
+        });
+        await customer.save();
+    }
+    res.status(201).send('Random Clients Created!');
+});
+
 router.post('/', auth, async (req, res) => {
     const { error } = validate(req.body);
     if (error) return res.status(400).send(error.details[0].message);
 
     const customer = Customer({
         name: req.body.name,
-        address: req.body.address,
         phone1: req.body.phone1,
         phone2: req.body.phone2,
         email1: req.body.email1,

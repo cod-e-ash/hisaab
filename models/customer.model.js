@@ -14,7 +14,9 @@ const Customer = mongoose.Schema({
     country: {type: String, require: true },
     zipcode: {type: String, require: true },
     gstn: { type: String },
-    pan: { type: String }
+    pan: { type: String },
+    type: { type: String }
+
 });
 
 function validateCustomer(customer) {
@@ -30,7 +32,8 @@ function validateCustomer(customer) {
         country: Joi.string().required(),
         zipcode: Joi.string().required(),
         gstn: Joi.string(),
-        pan: Joi.string()
+        pan: Joi.string(),
+        type: Joi.string()
     }
     return Joi.validate(customer, customerSchema);
 }

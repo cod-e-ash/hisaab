@@ -126,9 +126,7 @@ router.delete('/:id', auth, async (req,res) => {
     if (error) return res.status(400).send(error.message); 
     
     const product = await Product.findByIdAndRemove(req.params.id);
-    console.log(product);
     if (!product) {
-        console.log('deleted');
         return res.status(404).send({error:'Product not found!'});
     }
     res.status(200).send({product: product});
