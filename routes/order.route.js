@@ -52,7 +52,8 @@ router.get('/', async (req, res) => {
     const orders = await Order
                     .find(searchQry)
                     .skip(skipRecs)
-                    .limit(10);
+                    .limit(10)
+                    .sort({date:-1});
     
     res.status(200).send({totalRecs: totalRecs, totalPages: totalPages, curPage: curPage, orders: orders});
 });

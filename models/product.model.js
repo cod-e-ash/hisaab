@@ -11,6 +11,7 @@ const Product = mongoose.Schema({
     variant: { type: String },
     unit: { type: String },
     price: { type: Number, required: true },
+    mrp: { type: Number, required: true },
     margin: { type: Number, required: true },
     stock: { type: Number},
     taxrate: { type: String }
@@ -26,6 +27,7 @@ function validateProduct(product) {
         size: Joi.string().allow('').optional(),
         unit: Joi.string().allow('').optional(),
         price: Joi.number().required(),
+        mrp: Joi.number().required(),
         margin: Joi.number().optional(),
         stock: Joi.number(),
         taxrate: Joi.string().required()
