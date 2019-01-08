@@ -87,7 +87,8 @@ router.post('/', auth, async (req, res) => {
         country: req.body.country,
         zipcode: req.body.zipcode,
         gstn:  req.body.gstn,
-        pan: req.body.pan
+        pan: req.body.pan,
+        type: req.body.type
     });
 
     await customer.save();

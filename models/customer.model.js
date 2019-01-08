@@ -15,7 +15,7 @@ const Customer = mongoose.Schema({
     zipcode: {type: String, require: true },
     gstn: { type: String },
     pan: { type: String },
-    type: { type: String }
+    type: { type: String, required: true }
 
 });
 
@@ -23,17 +23,17 @@ function validateCustomer(customer) {
     const customerSchema = {
         name: Joi.string().required(),
         phone1: Joi.string().required(),
-        phone2: Joi.string(),
-        email1: Joi.string(),
-        email2: Joi.string(),
+        phone2: Joi.string().optional().allow(''),
+        email1: Joi.string().optional().email().allow(''),
+        email2: Joi.string().optional().email().allow(''),
         address: Joi.string().required(),
         city: Joi.string().required(),
         state: Joi.string(),
         country: Joi.string().required(),
         zipcode: Joi.string().required(),
-        gstn: Joi.string(),
-        pan: Joi.string(),
-        type: Joi.string()
+        gstn: Joi.string().optional().allow(''),
+        pan: Joi.string().optional().allow(''),
+        type: Joi.string().required()
     }
     return Joi.validate(customer, customerSchema);
 }
