@@ -1,64 +1,53 @@
 const mongoose = require('mongoose');
+const Customer = require('./customer.model');
+const Product = require('./product.model');
 const Joi = require('joi');
 const validateObjectId = require('../helpers/validateObjectId');
 
 const OrderDetail = mongoose.Schema({
     itemno: { type: Number },
-    name: { type: String },
-    hsn: { type: String },
-    mrp: { type: Number },
+    product: { type: mongoose.Schema.Types.ObjectId, ref: 'Product'},
     quantity: { type: Number },
-    margin: { type: Number },
-    discountpercentage: { type: Number },
-    discountamount: { type: Number },
-    rate: { type: Number },
-    taxrate: { type: String },
-    taxamount: { type: Number },
-    totalamount: { type: Number }
+    discountrate: { type: Number },
+    discount: { type: Number },
+    tax: { type: Number },
+    total: { type: Number }
 });
 
 const Order = mongoose.Schema({
     orderno: { type: String, required: true },
     date: { type: Date, default: Date.now },
-    custid: { type: String, required: true },
-    client: { type: String, required: true },
+    customername: { type: String, required: true },
+    customer: { type: mongoose.Schema.Types.ObjectId, ref: 'Customer' },
     total: { type: Number },
+    discountrate: { type: Number, default: 0 },
     discount: { type: Number, default: 0 },
-    discountamount: { type: Number, default: 0 },
     totaltax: { type: Number, default: 0 },
-    pkgdly: { type: Number, default: 0 },
     finalamount: { type: Number },
-    status: { type: String },
+    status: { type: String, default: 'Pending' },
     details: { type: [OrderDetail] }
 });
 
 function validateOrder(order) {
 
     const orderDetailSchema = {
-        itemno: Joi.number().required(),
-        name: Joi.string().required(),
-        hsn : Joi.string().required(),
-        mrp : Joi.number().required(),
+        product: Joi.string(),
         quantity: Joi.number().required(),
-        margin: Joi.number(),
-        discountpercentage: Joi.number(),
-        discountamount: Joi.number(),
-        rate: Joi.number().required(),
-        taxrate: Joi.string(),
-        taxamount: Joi.number(),
-        totalamount: Joi.number().required()
+        discountrate: Joi.number(),
+        discount: Joi.number(),
+        tax: Joi.number().required(),
+        total: Joi.number().required()
     }
-    
+
     const orderSchema = Joi.object({
         orderno: Joi.string().required(),
         date: Joi.date().required(),
-        custid: Joi.string().required(),
-        client: Joi.string().required(),
+        customername: Joi.string().required(),
+        customer: Joi.string().required(),
         total: Joi.number().required(),
+        discountrate: Joi.number(),
         discount: Joi.number(),
-        discountamount: Joi.number(),
         totaltax: Joi.number(),
-        pkgdly: Joi.number(),
         finalamount: Joi.number(),
         status: Joi.string().default('Pending'),
         details: Joi.array().min(1).items(Joi.object(orderDetailSchema)).required()
@@ -72,14 +61,9 @@ Order.virtual('calcDiscount')
     return this.total * (this.discount/100);
   });
 
-Order.virtual('calcFianlAmount')
+Order.virtual('calcFinalAmount')
   .get(function() {
-    return this.total - this.discountamount + this.totaltax + this.pkgdly;
-  });
-
-  Order.virtual('calcFianlAmount')
-  .get(function() {
-    return this.total - this.discountamount + this.totaltax + this.pkgdly;
+    return this.total - this.discountamount + this.totaltax;
   });
 
 function validateId(orderId) {

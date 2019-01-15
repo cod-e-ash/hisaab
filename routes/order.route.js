@@ -13,9 +13,9 @@ router.get('/', async (req, res) => {
     if (req.query.orderno) {
         searchQry['orderno'] = {$regex : '.*' + req.query.orderno + '.*', $options: 'i'};
     }
-    // If Company provided
+    // If Customer provided
     if (req.query.client) {
-        searchQry['client'] = {$regex : '.*' + req.query.client + '.*', $options: 'i'};
+        searchQry['customername'] = {$regex : '.*' + req.query.client + '.*', $options: 'i'};
     }
     // If only active orders
     if (!req.query.statusOpt || req.query.statusOpt==='true') {
@@ -53,6 +53,10 @@ router.get('/', async (req, res) => {
                     .find(searchQry)
                     .skip(skipRecs)
                     .limit(10)
+                    .populate({
+                        path: 'customer',
+                    })
+                    .populate('details.product')
                     .sort({date:-1});
     
     res.status(200).send({totalRecs: totalRecs, totalPages: totalPages, curPage: curPage, orders: orders});
@@ -65,29 +69,28 @@ router.post('/fake', async (req, res) => {
         let order = Order ({
             orderno: faker.random.number({min:10001, max:99999}),
             date: faker.date.past(),
-            custid: faker.random.number({min:10001, max:99999}),
-            client: faker.company.companyName(),
+            customername: faker.company.companyName(),
+            customer: faker.random.arrayElement([
+                '5c31a8f00ca3b41b80c68bb6', '5c31a8f10ca3b41b80c68bb9', '5c31a8f20ca3b41b80c68bbe',
+                '5c31a8f20ca3b41b80c68bc0', '5c31a8f30ca3b41b80c68bc3', '5c31a8f30ca3b41b80c68bc4'
+            ]),
             total: faker.random.number({min:100, max:99999}),
-            discount: faker.random.number({min:0, max:15}),
-            discountamount: faker.random.number({min:0, max:100}),
+            discountrate: faker.random.number({min:0, max:15}),
+            discount: faker.random.number({min:0, max:100}),
             totaltax: faker.random.number({min:0, max:100}),
-            pkgdly: faker.random.number({min:0, max:100}),
-            status: faker.random.arrayElement(['Pending', 'Completed']),
             finalamount: faker.random.number({min:100, max:99999}),
+            status: faker.random.arrayElement(['Pending', 'Completed']),
             details: {
                 itemno: faker.random.number({min:1, max:100}),
-                name: faker.commerce.productName(),
-                hsn : faker.random.alphaNumeric(4).toUpperCase(),
-                mrp : faker.commerce.price(),
+                product: faker.random.arrayElement([
+                    '5c329cdb10b94036ac605bed', '5c329cdc10b94036ac605bef', '5c329cdc10b94036ac605bf0',
+                    '5c329cdc10b94036ac605bf1', '5c329cdd10b94036ac605bf2', '5c329cdd10b94036ac605bf3'
+                ]),
                 quantity: faker.random.number({min:1, max:999}),
-                margin: 10,
-                discountpercentage: faker.random.number({min:0, max:15}),
-                discountamount: faker.random.number({min:0, max:100}),
-                rate: faker.random.number({min:1, max:9999}),
-                taxrate: faker.random.arrayElement(['Exempted', 'GST@5', 'GST@8', 'GST@12', 'GST@18', 
-                'GST@28', 'IGST@5', 'IGST@8', 'IGST@12', 'IGST@18', 'IGST@28']),
+                discountrate: faker.random.number({min:0, max:15}),
+                discount: faker.random.number({min:0, max:100}),
                 taxamount: faker.random.number({min:1, max:100}),
-                totalamount: faker.random.number({min:1, max:99999}),
+                total: faker.random.number({min:1, max:99999}),
             }
         });
         await order.save();
@@ -100,7 +103,7 @@ router.get('/:id', async (req, res) => {
     const error = validateId(req.params.id);
     if (error) return res.status(404).send("Invalid Order Id!");
 
-    const order = await Order.findById(req.params.id);
+    const order = await Order.findById(req.params.id).populate('customer').populate(details.product);
     if (!order) return res.status(400).send("No order found!");
     res.status(200).send(order);
 });
@@ -112,12 +115,12 @@ router.post('/', auth, async (req, res) => {
     const order = Order({
         orderno: req.body.orderno,
         date: req.body.date,
-        custid: req.body.custid,
+        custtomername: req.body.customername,
+        customer: req.body.customer,
         total: req.body.total,
-        discount: req.body.discount,
-        discountamount: req.body.discountamount,
+        discountrate: req.body.discount,
+        discount: req.body.discountamount,
         totaltax: req.body.totaltax,
-        pkgdly: req.body.pkgdly,
         finalamount: req.body.finalamount,
         details: req.body.details
     });
@@ -147,7 +150,7 @@ router.put('/:id', auth, async (req, res) => {
     order.finalamount = req.body.finalamount || order.finalamount;
     order.details = req.body.details || order.details;
 
-    await order.save();
+    await order.save().populate('customer').populate(details.product);
     res.status(200).send(order);
 });
 
