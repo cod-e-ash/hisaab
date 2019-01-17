@@ -7,20 +7,24 @@ const router = express.Router();
 
 router.get('/', async (req, res) => {
     let searchQry = {};
+    // If Code provided
+    if (req.query.code) {
+        searchQry['code'] = {$regex : '.*' + req.query.code + '.*', $options: 'i'};
+    } else {
+        // If Product provided
+        if (req.query.name) {
+            searchQry['name'] = {$regex : '.*' + req.query.name + '.*', $options: 'i'};
+        }
+        // If Company provided
+        if (req.query.company) {
+            searchQry['company'] = {$regex : '.*' + req.query.company + '.*', $options: 'i'};
+        }
+        // If only active products
+        if (!req.query.stockOpt || req.query.stockOpt==='true') {
+            searchQry['stock'] = {$gt: 0};
+        }
+    }
 
-    // If Product provided
-    if (req.query.name) {
-        searchQry['name'] = {$regex : '.*' + req.query.name + '.*', $options: 'i'};
-    }
-    // If Company provided
-    if (req.query.company) {
-        searchQry['company'] = {$regex : '.*' + req.query.company + '.*', $options: 'i'};
-    }
-    // If only active products
-    if (!req.query.stockOpt || req.query.stockOpt==='true') {
-        searchQry['stock'] = {$gt: 0};
-    }
-    
     const totalRecs = await Product.countDocuments(searchQry);
     // Check if any records
     if (totalRecs === 0) {
@@ -56,7 +60,8 @@ router.get('/:id', async (req, res) => {
 router.post('/fake', async (req, res) => {
     let fake_data = [];
     for(i=0;i<7;i++) {
-        let price = faker.commerce.price();
+        let price = +faker.commerce.price();
+        let mrp = (price + (price * (faker.random.number({min:30, max:60})/100)));
         let product = Product ({
             name: faker.commerce.productName(),
             company: faker.company.companyName(),
@@ -64,19 +69,20 @@ router.post('/fake', async (req, res) => {
             hsn: faker.random.alphaNumeric(4).toUpperCase(),
             variant: faker.commerce.productAdjective(),
             size: faker.random.arrayElement(['','XS', 'S', 'M', 'L', 'XL', 'XXL']),
-            unit: 'pieces',
-            price: faker.commerce.price(),
-            mrp: price + (price * faker.random.number({min:0.1, max:0.4})),
-            margin: 10,
+            unit: faker.random.arrayElement(['pieces','ml', 'litres', 'kg', 'gms']),
+            price: price,
+            mrp: mrp,
+            margin: faker.random.arrayElement([5,10,15,20]),
             stock: faker.commerce.price(),
             taxrate: faker.random.arrayElement(
-                ['Exempted', 'GST@5', 'GST@8', 'GST@12', 'GST@18', 
-                'GST@28', 'IGST@5', 'IGST@8', 'IGST@12', 'IGST@18', 'IGST@28'])
+                ['Exempted', 'GST@5', 'GST@12', 'GST@18', 'GST@28','GST@5', 'GST@12', 'GST@18', 'GST@28',
+                 'IGST@5', 'IGST@12', 'IGST@18', 'IGST@28'])
         });
         await product.save();
     }
     res.status(201).send('Random Products Created!');
 });
+
 
 router.post('/', auth, async (req, res) => {
     const { error } = validate(req.body);
