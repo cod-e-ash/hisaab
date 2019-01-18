@@ -6,6 +6,7 @@ const validateObjectId = require('../helpers/validateObjectId');
 
 const OrderDetail = mongoose.Schema({
     itemno: { type: Number },
+    price: { type: Number },
     product: { type: mongoose.Schema.Types.ObjectId, ref: 'Product'},
     quantity: { type: Number },
     discountrate: { type: Number },
@@ -31,6 +32,8 @@ const Order = mongoose.Schema({
 function validateOrder(order) {
 
     const orderDetailSchema = {
+        itemno: Joi.number(),
+        price: Joi.number(),
         product: Joi.string(),
         quantity: Joi.number().required(),
         discountrate: Joi.number(),
@@ -40,8 +43,6 @@ function validateOrder(order) {
     }
 
     const orderSchema = Joi.object({
-        orderno: Joi.string().required(),
-        date: Joi.date().required(),
         customername: Joi.string().required(),
         customer: Joi.string().required(),
         total: Joi.number().required(),

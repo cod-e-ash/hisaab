@@ -64,7 +64,6 @@ router.get('/', async (req, res) => {
 
 
 router.post('/fake', async (req, res) => {
-    let fake_data = [];
     for(i=0;i<7;i++) {
         let order = Order ({
             orderno: faker.random.number({min:10001, max:99999}),
@@ -83,13 +82,14 @@ router.post('/fake', async (req, res) => {
             details: {
                 itemno: faker.random.number({min:1, max:100}),
                 product: faker.random.arrayElement([
-                    '5c329cdb10b94036ac605bed', '5c329cdc10b94036ac605bef', '5c329cdc10b94036ac605bf0',
-                    '5c329cdc10b94036ac605bf1', '5c329cdd10b94036ac605bf2', '5c329cdd10b94036ac605bf3'
+                    '5c3ff051a0ea4f2914243c2f', '5c3ff051a0ea4f2914243c30', '5c3ff051a0ea4f2914243c31',
+                    '5c3ff051a0ea4f2914243c32', '5c3ff051a0ea4f2914243c33', '5c3ff051a0ea4f2914243c34'
                 ]),
+                price: faker.random.number({min:1, max:999}),
                 quantity: faker.random.number({min:1, max:999}),
                 discountrate: faker.random.number({min:0, max:15}),
                 discount: faker.random.number({min:0, max:100}),
-                taxamount: faker.random.number({min:1, max:100}),
+                tax: faker.random.number({min:1, max:100}),
                 total: faker.random.number({min:1, max:99999}),
             }
         });
@@ -109,19 +109,30 @@ router.get('/:id', async (req, res) => {
 });
 
 router.post('/', auth, async (req, res) => {
+    // req.body.customer = req.body.customer._id || '';
+    // req.body.details.forEach( (details, index) => {
+        // req.body.details[index].product = details.product._id || '';
+    // });
+    // console.log(req.body);
+    console.log(req.body);
+
     const { error } = validate(req.body);
     if (error) return res.status(400).send(error.details[0].message);
 
+    let orderNo = await Order.estimatedDocumentCount();
+    orderNo += 101;
+
     const order = Order({
-        orderno: req.body.orderno,
-        date: req.body.date,
-        custtomername: req.body.customername,
+        orderno: orderNo,
+        date: new Date,
+        customername: req.body.customername,
         customer: req.body.customer,
         total: req.body.total,
         discountrate: req.body.discount,
         discount: req.body.discountamount,
         totaltax: req.body.totaltax,
         finalamount: req.body.finalamount,
+        status: 'Pending',
         details: req.body.details
     });
 
@@ -133,24 +144,27 @@ router.put('/:id', auth, async (req, res) => {
     const err = validateId(req.params.id);
     if (err) return res.status(404).send("Invalid Order Id!");
 
-    const { error } = validate(req.body);
-    if (error) return res.status(400).send("Invalid data!");
+    // const { error } = validate(req.body);
+    // if (error) return res.status(400).send(error.details[0].message);
 
     let order = await Order.findOne({"_id":req.params.id});
     if (!order) return res.status(400).send("Order not found!");
 
-    order.orderno = req.body.orderno || order.orderno;
-    order.date = req.body.date || order.date;
-    order.custid = req.body.custid || order.custid;
+    order.customername = req.body.customername || order.customername;
+    order.customer = req.body.customer || order.customer;
     order.total = req.body.total || order.total;
+    order.discountrate = req.body.discountrate || order.discountrate;
     order.discount = req.body.discount || order.discount;
-    order.discountamount = req.body.discountamount || order.discountamount;
     order.totaltax = req.body.totaltax || order.totaltax;
-    order.pkgdly = req.body.pkgdly || order.pkgdly;
     order.finalamount = req.body.finalamount || order.finalamount;
     order.details = req.body.details || order.details;
 
-    await order.save().populate('customer').populate(details.product);
+    await order.save();
+    order = await Order.find({"_id":req.params.id})
+                .populate({
+                    path: 'customer',
+                })
+                .populate('details.product')
     res.status(200).send(order);
 });
 
