@@ -109,12 +109,6 @@ router.get('/:id', async (req, res) => {
 });
 
 router.post('/', auth, async (req, res) => {
-    // req.body.customer = req.body.customer._id || '';
-    // req.body.details.forEach( (details, index) => {
-        // req.body.details[index].product = details.product._id || '';
-    // });
-    // console.log(req.body);
-    console.log(req.body);
 
     const { error } = validate(req.body);
     if (error) return res.status(400).send(error.details[0].message);
