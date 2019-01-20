@@ -8,6 +8,7 @@ const customerRoutes = require('./routes/customer.route');
 const orderRoutes = require('./routes/order.route');
 const userRoutes = require('./routes/user.route');
 const authRoutes = require('./routes/auth.route');
+const infoRoutes = require('./routes/info.route');
 const errorHandler = require('./middlewares/error-handler');
 const logger = require('./helpers/logger');
 
@@ -40,6 +41,7 @@ app.use('/api/customers', customerRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/auth', authRoutes);
+app.use('/api/info', infoRoutes);
 
 app.use(errorHandler);
 
