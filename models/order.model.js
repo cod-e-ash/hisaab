@@ -44,6 +44,7 @@ function validateOrder(order) {
 
     const orderSchema = Joi.object({
         customername: Joi.string().required(),
+        date: Joi.date().optional(),
         customer: Joi.string().required(),
         total: Joi.number().required(),
         discountrate: Joi.number(),

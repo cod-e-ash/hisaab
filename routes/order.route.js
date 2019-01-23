@@ -1,5 +1,6 @@
 const express = require('express');
 const { Order, validate, validateId } = require('../models/order.model');
+const { Product } = require('../models/product.model');
 const debug = require('debug')('app:order');
 const auth = require('../middlewares/auth');
 const faker = require('faker');
@@ -126,10 +127,14 @@ router.post('/', auth, async (req, res) => {
         discount: req.body.discountamount,
         totaltax: req.body.totaltax,
         finalamount: req.body.finalamount,
-        status: 'Pending',
+        status: req.body.status || 'Pending',
         details: req.body.details
     });
 
+    if (order.status === 'Completed') {
+        updateOrder(order.details, -1);
+    }
+    
     await order.save();
     res.status(201).send(order);
 });
@@ -141,24 +146,37 @@ router.put('/:id', auth, async (req, res) => {
     // const { error } = validate(req.body);
     // if (error) return res.status(400).send(error.details[0].message);
 
-    let order = await Order.findOne({"_id":req.params.id});
+    let order = await Order.findOne({"_id":req.params.id}).populate('details.product')
     if (!order) return res.status(400).send("Order not found!");
+    const prvStatus = order.status;
+
+    if (prvStatus === 'Completed' && req.body.status === 'Pending') {
+        await updateOrder(order.details, 1);
+    }
 
     order.customername = req.body.customername || order.customername;
     order.customer = req.body.customer || order.customer;
-    order.total = req.body.total || order.total;
-    order.discountrate = req.body.discountrate || order.discountrate;
-    order.discount = req.body.discount || order.discount;
-    order.totaltax = req.body.totaltax || order.totaltax;
+    order.total = req.body.total;
+    order.discountrate = req.body.discountrate;
+    order.discount = req.body.discount;
+    order.totaltax = req.body.totaltax;
     order.finalamount = req.body.finalamount || order.finalamount;
     order.details = req.body.details || order.details;
+    order.status = req.body.status || order.status;
+    order.date = req.body.date || order.date;
 
+    if ( prvStatus === 'Pending' && req.body.status === 'Completed' ) {
+        await updateOrder(order.details, 1);
+    }
+    
     await order.save();
+
     order = await Order.find({"_id":req.params.id})
                 .populate({
                     path: 'customer',
                 })
                 .populate('details.product')
+
     res.status(200).send(order);
 });
 
@@ -170,5 +188,15 @@ router.delete('/:id', auth, async (req, res) => {
     if (!order) res.status(400).send("Order not found!");
     res.status(200).send(order);
 });
+
+async function updateOrder(details, mulWith) {
+    productDiff = [];
+    for (newItem of details ) {
+        productDiff.push({id: newItem.product._id, diff: mulWith * (newItem.quantity)});
+    }
+    for (prod of productDiff) {
+        await Product.findByIdAndUpdate( {_id: prod.id}, {$inc: {stock: prod.diff}} );
+    }
+}
 
 module.exports = router;
