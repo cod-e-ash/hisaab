@@ -32,7 +32,8 @@ router.get('/orderinfo', async (req, res) => {
             year: { $year : '$date'},
             month: { $month: '$date' }
         }},
-        {$match: matchCond
+        {
+            $match: matchCond
         },
         {$group: {
             _id: '$status',
