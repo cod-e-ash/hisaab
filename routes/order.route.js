@@ -3,7 +3,7 @@ const { Order, validate, validateId } = require('../models/order.model');
 const { Product } = require('../models/product.model');
 const debug = require('debug')('app:order');
 const auth = require('../middlewares/auth');
-const faker = require('faker');
+// const faker = require('faker');
 
 
 const router = express.Router();

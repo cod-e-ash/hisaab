@@ -6,7 +6,7 @@ const {
 } = require('../models/customer.model');
 const router = express.Router();
 const auth = require('../middlewares/auth');
-const faker = require('faker');
+// const faker = require('faker');
 
 
 router.get('/', async (req, res) => {

@@ -1,7 +1,7 @@
 const express = require('express');
 const { Product, validate, validateId } = require('../models/product.model');
 const auth = require('../middlewares/auth');
-const faker = require('faker');
+// const faker = require('faker');
 
 const router = express.Router();
 
