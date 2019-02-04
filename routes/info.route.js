@@ -4,8 +4,7 @@ const { Customer } = require('../models/customer.model');
 const { Product } = require('../models/product.model');
 const router = express.Router();
 
-router.get('/orderinfo', async (req, res) => {
-
+router.get('/orders', async (req, res) => {
     let matchCond = {};
 
     matchCond['year'] = {$eq : +req.query.year || new Date().getFullYear()};
