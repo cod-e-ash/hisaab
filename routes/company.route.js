@@ -38,18 +38,18 @@ router.put('', async (req, res) => {
     if (error) res.status(400).send({error: error.details[0].message});
 
     const company = await Company.findOne();
-    company.name = req.body.name || company.name;
-    company.owner = req.body.owner || company.owner;
-    company.phone = req.body.phone ||     company.phone; 
-    company.email = req.body.email || company.email;
-    company.address = req.body.address || company.address;
-    company.city = req.body.city || company.city
-    company.state = req.body.state || company.state;
-    company.country = req.body.country || company.country;
-    company.zipcode = req.body.zipcode || company.zipcode;
-    company.gstn = req.body.gstn || company.gstn;
-    company.pan = req.body.currency || company.currency;
-    company.currency = req.body.currency || company.currency;
+    company.name = req.body.name;
+    company.owner = req.body.owner;
+    company.phone = req.body.phone; 
+    company.email = req.body.email;
+    company.address = req.body.address;
+    company.city = req.body.city;
+    company.state = req.body.state;
+    company.country = req.body.country;
+    company.zipcode = req.body.zipcode;
+    company.gstn = req.body.gstn;
+    company.pan = req.body.pan;
+    company.currency = req.body.currency;
 
     await company.save();
     res.status(200).send({company: company});

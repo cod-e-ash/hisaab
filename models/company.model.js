@@ -21,14 +21,14 @@ function validateCompany(company) {
         name: Joi.string().required(),
         owner: Joi.string().required(),
         phone: Joi.string().required(),
-        email: Joi.string().email(),
+        email: Joi.string().optional().email().allow(),
         address: Joi.string().required(),
         city: Joi.string().required(),
-        state: Joi.string(),
+        state: Joi.string().optional().allow(''),
         country: Joi.string().required(),
         zipcode: Joi.string().required(),
         gstn: Joi.string().default('N/A'),
-        pan: Joi.string(),
+        pan: Joi.string().optional().allow(''),
         currency: Joi.string()
     }
     return Joi.validate(company,companySchema);

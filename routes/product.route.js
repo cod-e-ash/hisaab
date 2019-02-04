@@ -57,31 +57,31 @@ router.get('/:id', async (req, res) => {
     res.status(200).send(product);
 });
 
-router.post('/fake', async (req, res) => {
-    let fake_data = [];
-    for(i=0;i<7;i++) {
-        let price = +faker.commerce.price();
-        let mrp = (price + (price * (faker.random.number({min:30, max:60})/100)));
-        let product = Product ({
-            name: faker.commerce.productName(),
-            company: faker.company.companyName(),
-            code: faker.random.number({min:10001, max:99999}) ,
-            hsn: faker.random.alphaNumeric(4).toUpperCase(),
-            variant: faker.commerce.productAdjective(),
-            size: faker.random.arrayElement(['','XS', 'S', 'M', 'L', 'XL', 'XXL']),
-            unit: faker.random.arrayElement(['pieces','ml', 'litres', 'kg', 'gms']),
-            price: price,
-            mrp: mrp,
-            margin: faker.random.arrayElement([5,10,15,20]),
-            stock: faker.commerce.price(),
-            taxrate: faker.random.arrayElement(
-                ['Exempted', 'GST@5', 'GST@12', 'GST@18', 'GST@28','GST@5', 'GST@12', 'GST@18', 'GST@28',
-                 'IGST@5', 'IGST@12', 'IGST@18', 'IGST@28'])
-        });
-        await product.save();
-    }
-    res.status(201).send('Random Products Created!');
-});
+// router.post('/fake', async (req, res) => {
+//     let fake_data = [];
+//     for(i=0;i<7;i++) {
+//         let price = +faker.commerce.price();
+//         let mrp = (price + (price * (faker.random.number({min:30, max:60})/100)));
+//         let product = Product ({
+//             name: faker.commerce.productName(),
+//             company: faker.company.companyName(),
+//             code: faker.random.number({min:10001, max:99999}) ,
+//             hsn: faker.random.alphaNumeric(4).toUpperCase(),
+//             variant: faker.commerce.productAdjective(),
+//             size: faker.random.arrayElement(['','XS', 'S', 'M', 'L', 'XL', 'XXL']),
+//             unit: faker.random.arrayElement(['pieces','ml', 'litres', 'kg', 'gms']),
+//             price: price,
+//             mrp: mrp,
+//             margin: faker.random.arrayElement([5,10,15,20]),
+//             stock: faker.commerce.price(),
+//             taxrate: faker.random.arrayElement(
+//                 ['Exempted', 'GST@5', 'GST@12', 'GST@18', 'GST@28','GST@5', 'GST@12', 'GST@18', 'GST@28',
+//                  'IGST@5', 'IGST@12', 'IGST@18', 'IGST@28'])
+//         });
+//         await product.save();
+//     }
+//     res.status(201).send('Random Products Created!');
+// });
 
 
 router.post('/', auth, async (req, res) => {

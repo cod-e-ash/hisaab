@@ -1,4 +1,5 @@
 require('express-async-errors');
+const http = require('http');
 const express = require('express');
 const helmet = require('helmet');
 const connectDB = require('./startup');
@@ -35,6 +36,8 @@ app.use((req,res,next) => {
     next();
 });
 
+app.use("/", express.static(path.join(__dirname, "hisaab")));
+
 // Routes
 app.use('/api/taxrates', taxRoutes);
 app.use('/api/products', productRoutes);
@@ -44,9 +47,15 @@ app.use('/api/users', userRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/company', companyRoutes);
 app.use('/api/info', infoRoutes);
+app.use((req, res) => {
+  res.sendFile(path.join(__dirname, 'hisaab', 'index.html'));
+});
 
 app.use(errorHandler);
 
 const port = process.env.PORT || 3000
 
-app.listen(port, () => console.log(`Listening on port ${port}`));
+const server = http.createServer(app);
+server.on("error", onError);
+server.on("listening", onListening);
+server.listen(port);

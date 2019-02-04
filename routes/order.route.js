@@ -64,40 +64,50 @@ router.get('/', async (req, res) => {
 });
 
 
-router.post('/fake', async (req, res) => {
-    for(i=0;i<7;i++) {
-        let order = Order ({
-            orderno: faker.random.number({min:10001, max:99999}),
-            date: faker.date.past(),
-            customername: faker.company.companyName(),
-            customer: faker.random.arrayElement([
-                '5c31a8f00ca3b41b80c68bb6', '5c31a8f10ca3b41b80c68bb9', '5c31a8f20ca3b41b80c68bbe',
-                '5c31a8f20ca3b41b80c68bc0', '5c31a8f30ca3b41b80c68bc3', '5c31a8f30ca3b41b80c68bc4'
-            ]),
-            total: faker.random.number({min:100, max:99999}),
-            discountrate: faker.random.number({min:0, max:15}),
-            discount: faker.random.number({min:0, max:100}),
-            totaltax: faker.random.number({min:0, max:100}),
-            finalamount: faker.random.number({min:100, max:99999}),
-            status: faker.random.arrayElement(['Pending', 'Completed']),
-            details: {
-                itemno: faker.random.number({min:1, max:100}),
-                product: faker.random.arrayElement([
-                    '5c3ff051a0ea4f2914243c2f', '5c3ff051a0ea4f2914243c30', '5c3ff051a0ea4f2914243c31',
-                    '5c3ff051a0ea4f2914243c32', '5c3ff051a0ea4f2914243c33', '5c3ff051a0ea4f2914243c34'
-                ]),
-                price: faker.random.number({min:1, max:999}),
-                quantity: faker.random.number({min:1, max:999}),
-                discountrate: faker.random.number({min:0, max:15}),
-                discount: faker.random.number({min:0, max:100}),
-                tax: faker.random.number({min:1, max:100}),
-                total: faker.random.number({min:1, max:99999}),
-            }
-        });
-        await order.save();
-    }
-    res.status(201).send('Random Orders Created!');
-});
+// router.post('/fake', async (req, res) => {
+//     for(i=0;i<7;i++) {
+//         let details = [];
+//         productcount = faker.random.number({min:1, max:50});
+//         for(j=0;j<productcount;j++) {
+//             details.push({
+//                 itemno: faker.random.number({min:1, max:100}),
+//                 product: faker.random.arrayElement([
+//                     '5c3ff051a0ea4f2914243c2f', '5c3ff051a0ea4f2914243c30', '5c3ff051a0ea4f2914243c31',
+//                     '5c3ff051a0ea4f2914243c32', '5c3ff051a0ea4f2914243c33', '5c3ff051a0ea4f2914243c34',
+//                     '5c3ff054a0ea4f2914243c3d', '5c3ff054a0ea4f2914243c3e', '5c3ff054a0ea4f2914243c3f',
+//                     '5c3ff054a0ea4f2914243c40', '5c3ff054a0ea4f2914243c41', '5c3ff058a0ea4f2914243c55',
+//                     '5c3ff057a0ea4f2914243c54', '5c3ff057a0ea4f2914243c53', '5c3ff057a0ea4f2914243c52',
+//                     '5c3ff057a0ea4f2914243c51', '5c3ff056a0ea4f2914243c50', '5c3ff056a0ea4f2914243c4d',
+//                     '5c3ff056a0ea4f2914243c4c', '5c3ff056a0ea4f2914243c4a', '5c3ff055a0ea4f2914243c49'
+//                 ]),
+//                 price: faker.random.number({min:1, max:999}),
+//                 quantity: faker.random.number({min:1, max:999}),
+//                 discountrate: faker.random.number({min:0, max:15}),
+//                 discount: faker.random.number({min:0, max:100}),
+//                 tax: faker.random.number({min:1, max:100}),
+//                 total: faker.random.number({min:1, max:99999}),
+//             });
+//         }
+//         let order = Order ({
+//             orderno: faker.random.number({min:10001, max:99999}),
+//             date: faker.date.recent(20),
+//             customername: faker.company.companyName(),
+//             customer: faker.random.arrayElement([
+//                 '5c31a8f00ca3b41b80c68bb6', '5c31a8f10ca3b41b80c68bb9', '5c31a8f20ca3b41b80c68bbe',
+//                 '5c31a8f20ca3b41b80c68bc0', '5c31a8f30ca3b41b80c68bc3', '5c31a8f30ca3b41b80c68bc4'
+//             ]),
+//             total: faker.random.number({min:100, max:99999}),
+//             discountrate: faker.random.number({min:0, max:15}),
+//             discount: faker.random.number({min:0, max:100}),
+//             totaltax: faker.random.number({min:0, max:100}),
+//             finalamount: faker.random.number({min:100, max:99999}),
+//             status: faker.random.arrayElement(['Pending', 'Completed']),
+//             details: details
+//         });
+//         await order.save();
+//     }
+//     res.status(201).send('Random Orders Created!');
+// });
 
 
 router.get('/:id', async (req, res) => {
