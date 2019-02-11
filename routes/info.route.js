@@ -67,16 +67,63 @@ router.get('/products', async (req, res) => {
     res.status(200).json({"count":count});
 });
 
-router.get('/taxforyear', async (req, res) => {
+router.get('/tax', async (req, res) => {
 
-    let curYear = req.params.year || new Date().getFullYear();
+    let matchCond = {};
 
-    const monthTax = Order.aggregate([
+    matchCond['year'] = {$eq : +req.query.year || new Date().getFullYear()};
+
+    if (req.query.month) {
+        matchCond['month'] = {$eq : +req.query.month};
+    }
+
+    const orders = await Order.aggregate([
+        { $project: {
+            _id: '$_id',
+            orderno: '$orderno',
+            status: '$status',
+            totaltax: '$totaltax',
+            details: '$details',
+            year: { $year : '$date'},
+            month: { $month: '$date' }
+        }},
         {
-            $match: {} 
+            $match: matchCond
+        },
+        {
+            $unwind: "$details"
+        },
+        {
+            $project: {
+                orderno: '$orderno',
+                product: '$details.product',
+                taxrate: '$details.taxrate',
+                taxamount: '$details.tax',
+                amount:'$details.total',
+            }
+        },
+        {
+            // $group: {
+            //     _id: {
+            //         orderno: '$orderno',
+            //         taxrate: '$taxrate'
+            //     },
+            //     count: {$sum:1},
+            //     amount: {$sum:'$amount'},
+            //     taxamount: {$sum:'$taxamount'}
+            // },
+            $group: {
+                _id: "$taxrate",
+                amount: {$sum:'$amount'},
+                taxamount: {$sum:'$taxamount'}
+            }
+        },
+        {
+            $sort: {"_id":1}
         }
     ]);
 
+    res.send(orders);
 });
 
 module.exports = router;

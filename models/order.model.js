@@ -11,6 +11,7 @@ const OrderDetail = mongoose.Schema({
     quantity: { type: Number },
     discountrate: { type: Number },
     discount: { type: Number },
+    taxrate: { type: String},
     tax: { type: Number },
     total: { type: Number }
 });
@@ -38,6 +39,7 @@ function validateOrder(order) {
         quantity: Joi.number().required(),
         discountrate: Joi.number(),
         discount: Joi.number(),
+        taxrate: Joi.string().required(),
         tax: Joi.number().required(),
         total: Joi.number().required()
     }

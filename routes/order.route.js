@@ -3,7 +3,7 @@ const { Order, validate, validateId } = require('../models/order.model');
 const { Product } = require('../models/product.model');
 const debug = require('debug')('app:order');
 const auth = require('../middlewares/auth');
-// const faker = require('faker');
+const faker = require('faker');
 
 
 const router = express.Router();
@@ -81,10 +81,13 @@ router.get('/', async (req, res) => {
 //                     '5c3ff056a0ea4f2914243c4c', '5c3ff056a0ea4f2914243c4a', '5c3ff055a0ea4f2914243c49'
 //                 ]),
 //                 price: faker.random.number({min:1, max:999}),
-//                 quantity: faker.random.number({min:1, max:999}),
+//                 quantity: faker.random.number({min:1, max:50}),
 //                 discountrate: faker.random.number({min:0, max:15}),
 //                 discount: faker.random.number({min:0, max:100}),
-//                 tax: faker.random.number({min:1, max:100}),
+//                 taxrate: faker.random.arrayElement(
+//                     ['Exempted', 'GST@5', 'GST@12', 'GST@18', 'GST@28','GST@5', 'GST@12', 'GST@18', 'GST@28',
+//                     'IGST@5', 'IGST@12', 'IGST@18', 'IGST@28']),
+//                 tax: faker.random.number({min:0, max:100}),
 //                 total: faker.random.number({min:1, max:99999}),
 //             });
 //         }
