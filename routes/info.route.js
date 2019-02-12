@@ -70,13 +70,19 @@ router.get('/products', async (req, res) => {
 router.get('/tax', async (req, res) => {
 
     let matchCond = {};
+    if (!req.query.startyear || !req.query.startmonth || 
+        !req.query.endyear || !req.query.endmonth) {
+            return res.status(400).send('Bad Request - Enter proper dates');
+        }
+    const startDate = new Date(req.query.startyear+'-'+req.query.startmonth+'-'+01);
+    const endDate = new Date(+req.query.endyear, +req.query.endmonth,0);
 
-    matchCond['year'] = {$eq : +req.query.year || new Date().getFullYear()};
-
-    if (req.query.month) {
-        matchCond['month'] = {$eq : +req.query.month};
+    if (req.query.startyear) {
+        matchCond['$and'] = 
+        [{'date': {'$gte': startDate}},
+         {'date': {'$lte' : endDate}}];
     }
-
+    
     const orders = await Order.aggregate([
         { $project: {
             _id: '$_id',
@@ -84,8 +90,7 @@ router.get('/tax', async (req, res) => {
             status: '$status',
             totaltax: '$totaltax',
             details: '$details',
-            year: { $year : '$date'},
-            month: { $month: '$date' }
+            date: '$date'
         }},
         {
             $match: matchCond
@@ -103,15 +108,6 @@ router.get('/tax', async (req, res) => {
             }
         },
         {
-            // $group: {
-            //     _id: {
-            //         orderno: '$orderno',
-            //         taxrate: '$taxrate'
-            //     },
-            //     count: {$sum:1},
-            //     amount: {$sum:'$amount'},
-            //     taxamount: {$sum:'$taxamount'}
-            // },
             $group: {
                 _id: "$taxrate",
                 amount: {$sum:'$amount'},
