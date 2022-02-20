@@ -1,19 +1,17 @@
-const Joi = require('joi');
-const mongoose = require('mongoose');
+import mongoose  from 'mongoose';
 
-const TaxRate = mongoose.Schema({
+const TaxRateSchema = mongoose.Schema({
     name: { type: String, required: true },
     rate: { type: Number, required: true, default: 0.0, min: 0, max: 100 }
 });
 
 function validateTaxRate(taxrate) {
-    const taxRateSchema = {
-        name: Joi.string().required(),
-        rate: Joi.number().required().min(0).max(100)
-    };
+    if(!taxrate || taxrate.name || taxrate.rate) return false;
+    if(taxrate.name.length < 2 || taxrate.name.length > 20) return false;
+    if(taxrate.rate < 0 || taxrate.rate > 100) return false;
+    return true;
+}
 
-    return Joi.validate(taxrate, taxRateSchema);
-};
+const model = mongoose.model('TaxRate', TaxRateSchema);
 
-exports.TaxRate = mongoose.model('TaxRate', TaxRate);
-exports.validateTaxRate = validateTaxRate;
+export {model as TaxRate, validateTaxRate}

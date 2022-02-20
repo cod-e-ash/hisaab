@@ -1,18 +1,44 @@
-const express = require('express');
-const { TaxRate, validateTaxRate } = require('../models/taxrate.model');
-const auth = require('../middlewares/auth');
+import * as express from 'express';
+import  { TaxRate, validateTaxRate } from '../models/taxrate.model.js';
+import auth from '../middlewares/auth.js';
 
 const router = express.Router();
 
 router.get('/', async (req, res) => {
-    const taxrates = await TaxRate.find();
-    res.status(200).send(taxrates);
+    let searchQry = {};
+    // If Code provided
+    if(req.query.name) {
+        searchQry['name'] = {$regex : '.*' + req.query.name + '.*', $options: 'i'};
+    }
+
+    const totalRecs = await TaxRate.countDocuments(searchQry);
+    // Check if any records
+    if (totalRecs === 0) {
+        return res.status(404).send({error: "No Records Found"});
+    }
+
+    const totalPages = Math.ceil(totalRecs / 10);
+    const curPage = +req.query.page || 1;
+
+    // Check of page number
+    if (curPage > totalPages || curPage < 1) {
+        return res.status(404).send({error: "Page Not Found"});
+    }
+    
+    const skipRecs = 10*(curPage-1);
+    const taxRates = await TaxRate
+                    .find(searchQry)
+                    .skip(skipRecs)
+                    .limit(10);
+    
+    res.status(200).send({totalRecs, totalPages, curPage, taxRates});
 });
 
+
 router.get('/:name', async (req, res) => {
-    const taxrates = await TaxRate.find({name: req.params.name});
-    if (!taxrates) return res.status(404).send('Tax Rate not found!');
-    res.status(200).send(taxrates);
+    const taxrate = await TaxRate.find({name: req.params.name});
+    if (!taxrate) return res.status(404).send('Tax Rate not found!');
+    res.status(200).send(taxrate);
 });
 
 router.post('/', auth, async (req, res) => {
@@ -49,4 +75,4 @@ router.delete('/:name', auth, async (req, res) => {
     res.status(200).send("Tax Rate deleted!");
 });
 
-module.exports = router;
+export default router;

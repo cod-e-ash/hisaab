@@ -1,1 +1,4 @@
-{}
+{
+    "mongo_pass": "MONGO_ATLAS_PW",
+    "jwtPrivateKey": "HISAAB_JWT_KEY"
+}

@@ -1,10 +1,11 @@
-const express = require('express');
-const { Order } = require('../models/order.model');
-const { Customer } = require('../models/customer.model');
-const { Product } = require('../models/product.model');
-const router = express.Router();
+import express from 'express';
+import { Order } from '../models/order.model.js';
+import { Customer } from '../models/customer.model.js';
+import { Product } from '../models/product.model.js';
 
-router.get('/orders', async (req, res) => {
+const taxRoutes = express.Router();
+
+taxRoutes.get('/orders', async (req, res) => {
     let matchCond = {};
 
     matchCond['year'] = {$eq : +req.query.year || new Date().getFullYear()};
@@ -45,7 +46,7 @@ router.get('/orders', async (req, res) => {
     res.status(200).send(status);
 });
 
-router.get('/clients', async (req, res) => {
+taxRoutes.get('/clients', async (req, res) => {
 
     // Group By Status and then Count, sum up revenue and total tax
     const clientGroups = await Customer
@@ -59,7 +60,7 @@ router.get('/clients', async (req, res) => {
     res.status(200).send(clientGroups);
 });
 
-router.get('/products', async (req, res) => {
+taxRoutes.get('/products', async (req, res) => {
 
     // Group By Status and then Count, sum up revenue and total tax
     const count = await Product.estimatedDocumentCount();
@@ -67,14 +68,14 @@ router.get('/products', async (req, res) => {
     res.status(200).json({"count":count});
 });
 
-router.get('/tax', async (req, res) => {
+taxRoutes.get('/tax', async (req, res) => {
 
     let matchCond = {};
     if (!req.query.startyear || !req.query.startmonth || 
         !req.query.endyear || !req.query.endmonth) {
             return res.status(400).send('Bad Request - Enter proper dates');
         }
-    const startDate = new Date(req.query.startyear+'-'+req.query.startmonth+'-'+01);
+    const startDate = new Date(`${req.query.startyear}-${req.query.startmonth}-01`);
     const endDate = new Date(+req.query.endyear, +req.query.endmonth,0);
 
     if (req.query.startyear) {
@@ -122,4 +123,4 @@ router.get('/tax', async (req, res) => {
     res.send(orders);
 });
 
-module.exports = router;
+export default taxRoutes;

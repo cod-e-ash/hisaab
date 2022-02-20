@@ -1,6 +1,6 @@
-const express = require('express');
-const { Product, validate, validateId } = require('../models/product.model');
-const auth = require('../middlewares/auth');
+import express from 'express';
+import { Product, validate, validateId } from '../models/product.model.js';
+import auth from '../middlewares/auth.js';
 // const faker = require('faker');
 
 const router = express.Router();
@@ -142,4 +142,4 @@ router.delete('/:id', auth, async (req,res) => {
     res.status(200).send({product: product});
 });
 
-module.exports = router;
+export default router;

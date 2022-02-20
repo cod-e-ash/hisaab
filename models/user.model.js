@@ -1,9 +1,8 @@
-const mongoose = require('mongoose');
-const Joi = require('joi');
-const jwt = require('jsonwebtoken');
-const config = require('config');
+import mongoose from 'mongoose';
+import jwt from 'jsonwebtoken';
+import config from 'config';
 
-const User = mongoose.Schema({
+const UserSchema = mongoose.Schema({
     username: {type: String, required: true, unique: true, minlength: 4, maxlength: 20},
     fullname: {type: String, required: true, min: 4},
     email: {type: String},
@@ -11,7 +10,7 @@ const User = mongoose.Schema({
     password: {type: String, required:true, unique: true}
 });
 
-User.methods.genAuthToken = function() {
+UserSchema.methods.genAuthToken = function() {
     return token = jwt.sign({
         username: this.username,
         fullname: this.fullname,
@@ -21,16 +20,15 @@ User.methods.genAuthToken = function() {
 }
 
 function validateUser(user) {
-    const UserSchema = {
-        username: Joi.string().required().min(4).max(20),
-        fullname: Joi.string().required().min(4),
-        email: Joi.string(),
-        role: Joi.string().required(),
-        password: Joi.string().required()
-    }
 
-    return Joi.validate(user, UserSchema);
+    if(user.username.length < 4 || user.username.length > 20) return false;
+    if(user.fullname.length < 4) return false;
+    if(user.password.length < 5 || user.password.length > 20) return false;
+    if(!user.email || user.email.length < 5 || user.email.length > 30 || 
+        !user.email.includes('@') || !user.email.includes('.')) return false;
+    if(user.role.length < 4 || user.role.length > 20) return false;
+    return true;
 }
 
-module.exports.User = mongoose.model('User', User);
-module.exports.validate = validateUser;
+const User = mongoose.model('User', UserSchema);
+export { User, validateUser as validate }

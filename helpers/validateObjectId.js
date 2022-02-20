@@ -1,6 +1,6 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
-module.exports = function validateObjectId(objectId, object) {
+export default function validateObjectId(objectId, object) {
     if (!mongoose.Types.ObjectId.isValid(objectId)) return `Invalid ${object} Id`;
     return;
 }

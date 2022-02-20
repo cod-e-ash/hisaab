@@ -1,9 +1,9 @@
-const express = require('express');
-const { Order, validate, validateId } = require('../models/order.model');
-const { Product } = require('../models/product.model');
-const debug = require('debug')('app:order');
-const auth = require('../middlewares/auth');
-// const faker = require('faker');
+import express from 'express';
+import { Order, validate, validateId } from '../models/order.model.js';
+import { Product } from '../models/product.model.js';
+// import debug from 'debug';
+import auth from '../middlewares/auth.js';
+// const faker from 'faker');
 
 
 const router = express.Router();
@@ -212,4 +212,4 @@ async function updateOrder(details, mulWith) {
     }
 }
 
-module.exports = router;
+export default router;

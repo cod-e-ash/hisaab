@@ -1,13 +1,9 @@
-const express = require('express');
-const {
-    Customer,
-    validate,
-    validateId
-} = require('../models/customer.model');
-const router = express.Router();
-const auth = require('../middlewares/auth');
+import express from 'express';
+import { Customer, validate, validateId } from '../models/customer.model.js';
+import auth from '../middlewares/auth.js';
 // const faker = require('faker');
 
+const router = express.Router();
 
 router.get('/', async (req, res) => {
     let searchQry = {};
@@ -146,4 +142,4 @@ router.delete('/:id', auth, async (req, res) => {
     res.status(200).send(customer);
 });
 
-module.exports = router;
+export default router;

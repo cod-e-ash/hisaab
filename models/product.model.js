@@ -1,8 +1,7 @@
-const mongoose = require('mongoose');
-const Joi = require('joi');
-const validateObjectId = require('../helpers/validateObjectId');
+import mongoose from 'mongoose';
+import validateObjectId from '../helpers/validateObjectId.js';
 
-const Product = mongoose.Schema({
+const ProductSchema = mongoose.Schema({
     code: { type: String },
     name: { type: String, required: true },
     company: { type: String, required: true },
@@ -18,28 +17,27 @@ const Product = mongoose.Schema({
 }); 
 
 function validateProduct(product) {
-    const productSchema = {
-        name: Joi.string().min(3).max(100).required(),
-        company: Joi.string().min(3).max(100).required(),
-        code: Joi.string(),
-        hsn: Joi.string().optional(),
-        variant: Joi.string().allow('').optional(),
-        size: Joi.string().allow('').optional(),
-        unit: Joi.string().allow('').optional(),
-        price: Joi.number().required(),
-        mrp: Joi.number().required(),
-        margin: Joi.number().optional(),
-        stock: Joi.number(),
-        taxrate: Joi.string().required()
-    }
-
-    return Joi.validate(product, productSchema);
+    if(!product) return false;
+    if(!product.code || product.code.length < 2 || product.code.length > 20) return false;
+    if(!product.name || product.name.length < 2 || product.name.length > 20) return false;
+    if(!product.company || product.company.length < 2 || product.company.length > 30) return false;
+    if(product.hsn && product.hsn.length > 20) return false;
+    if(product.size && product.size.length > 20) return false;
+    if(product.variant && product.variant.length > 20) return false;
+    if(product.unit && product.unit.length > 20) return false;
+    if(!product.price || product.price < 0) return false;
+    if(!product.mrp || product.mrp < 0) return false;
+    if(!product.margin || product.margin < 0) return false;
+    if(!product.stock || product.stock < 0) return false;
+    if(!product.taxrate || product.taxrate.length < 2 || product.taxrate.length > 20) return false;
+    return true;
 }
 
 function validateId(objectId) {
     return validateObjectId(objectId,"Product");
 }
 
-module.exports.Product = mongoose.model('Product', Product);
-module.exports.validate = validateProduct; 
-module.exports.validateId = validateId; 
+const Product = mongoose.model('Product', ProductSchema);
+export { Product };
+export {validateProduct as validate}; 
+export {validateId};

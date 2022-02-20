@@ -1,8 +1,5 @@
-const mongoose = require('mongoose');
-const Customer = require('./customer.model');
-const Product = require('./product.model');
-const Joi = require('joi');
-const validateObjectId = require('../helpers/validateObjectId');
+import mongoose from 'mongoose';
+import validateObjectId from '../helpers/validateObjectId.js';
 
 const OrderDetail = mongoose.Schema({
     itemno: { type: Number },
@@ -16,7 +13,7 @@ const OrderDetail = mongoose.Schema({
     total: { type: Number }
 });
 
-const Order = mongoose.Schema({
+const OrderSchema = mongoose.Schema({
     orderno: { type: String, required: true },
     date: { type: Date, default: Date.now },
     customername: { type: String, required: true },
@@ -30,42 +27,40 @@ const Order = mongoose.Schema({
     details: { type: [OrderDetail] }
 });
 
-function validateOrder(order) {
-
-    const orderDetailSchema = {
-        itemno: Joi.number(),
-        price: Joi.number(),
-        product: Joi.string(),
-        quantity: Joi.number().required(),
-        discountrate: Joi.number(),
-        discount: Joi.number(),
-        taxrate: Joi.string().required(),
-        tax: Joi.number().required(),
-        total: Joi.number().required()
-    }
-
-    const orderSchema = Joi.object({
-        customername: Joi.string().required(),
-        date: Joi.date().optional(),
-        customer: Joi.string().required(),
-        total: Joi.number().required(),
-        discountrate: Joi.number(),
-        discount: Joi.number(),
-        totaltax: Joi.number(),
-        finalamount: Joi.number(),
-        status: Joi.string().default('Pending'),
-        details: Joi.array().min(1).items(Joi.object(orderDetailSchema)).required()
-    });
-
-    return Joi.validate(order, orderSchema);
+function validateOrderDetails(orderDetail) 
+{
+  if(!orderDetail) return false;
+  if(!orderDetail.itemno || orderDetail.itemno < 0) return false;
+  if(!orderDetail.price || orderDetail.price < 0) return false;
+  if(!orderDetail.quantity || orderDetail.quantity < 0) return false;
+  if(!orderDetail.discountrate || orderDetail.discountrate < 0) return false;
+  if(!orderDetail.discount || orderDetail.discount < 0) return false;
+  if(!orderDetail.taxrate || orderDetail.taxrate.length < 2 || orderDetail.taxrate.length > 20) return false;
+  if(!orderDetail.tax || orderDetail.tax < 0) return false;
+  if(!orderDetail.total || orderDetail.total < 0) return false;
+  return true;
 }
 
-Order.virtual('calcDiscount')
+function validateOrder(order) {
+  if(!order) return false;
+  if(!order.orderno || order.orderno.length < 2 || order.orderno.length > 20) return false;
+  if(!order.customername || order.customername.length < 2 || order.customername.length > 30) return false;
+  if(!order.total || order.total < 0) return false;
+  if(!order.discountrate || order.discountrate < 0) return false;
+  if(!order.discount || order.discount < 0) return false;
+  if(!order.totaltax || order.totaltax < 0) return false;
+  if(!order.finalamount || order.finalamount < 0) return false;
+  if(!order.status || order.status.length < 2 || order.status.length > 20) return false;
+  if(!order.details || order.details.length < 1) return false;
+  return true;
+}
+
+OrderSchema.virtual('calcDiscount')
   .get(function() {
     return this.total * (this.discount/100);
   });
 
-Order.virtual('calcFinalAmount')
+OrderSchema.virtual('calcFinalAmount')
   .get(function() {
     return this.total - this.discountamount + this.totaltax;
   });
@@ -74,6 +69,5 @@ function validateId(orderId) {
     return validateObjectId(orderId, "Order");
 }
 
-module.exports.Order = mongoose.model('Order', Order);
-module.exports.validate = validateOrder;
-module.exports.validateId = validateId;
+const Order = mongoose.model('Order', OrderSchema);
+export { Order, validateOrder as validate, validateId }

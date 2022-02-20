@@ -1,8 +1,6 @@
-const express = require('express');
-const {
-    Company,
-    validateCompany
-} = require('../models/company.model');
+import express from 'express';
+import { Company , validateCompany} from '../models/company.model.js';
+
 const router = express.Router();
 
 router.get('', async (req, res) => {
@@ -14,7 +12,7 @@ router.get('', async (req, res) => {
 router.post('', async (req, res) => {
     const { error }  = validateCompany(req.body);
     if (error) res.status(400).send({error: error.details[0].message});
-    const company = Company({
+    const company = CompanySchema({
         name: req.body.name,
         owner: req.body.owner,
         phone: req.body.phone,
@@ -37,7 +35,7 @@ router.put('', async (req, res) => {
     const { error } = validateCompany(req.body);
     if (error) res.status(400).send({error: error.details[0].message});
 
-    const company = await Company.findOne();
+    const company = await CompanySchema.findOne();
     company.name = req.body.name;
     company.owner = req.body.owner;
     company.phone = req.body.phone; 
@@ -55,4 +53,4 @@ router.put('', async (req, res) => {
     res.status(200).send({company: company});
 });
 
-module.exports = router;
+export default router;

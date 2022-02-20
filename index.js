@@ -1,24 +1,26 @@
-require('express-async-errors');
-const path = require('path');
-const http = require('http');
-const express = require('express');
-const helmet = require('helmet');
-const connectDB = require('./startup');
-const taxRoutes = require('./routes/taxrate.route');
-const productRoutes = require('./routes/product.route');
-const customerRoutes = require('./routes/customer.route');
-const orderRoutes = require('./routes/order.route');
-const userRoutes = require('./routes/user.route');
-const authRoutes = require('./routes/auth.route');
-const infoRoutes = require('./routes/info.route');
-const companyRoutes = require('./routes/company.route');
-const errorHandler = require('./middlewares/error-handler');
-const logger = require('./helpers/logger');
+import 'express-async-errors';
+import { join } from 'path';
+import { createServer } from 'http';
+import express, { json, urlencoded } from 'express';
+import helmet from 'helmet';
+import connectDB from './startup.js';
+import taxRoutes from './routes/taxrate.route.js';
+import productRoutes from './routes/product.route.js';
+import customerRoutes from './routes/customer.route.js';
+import orderRoutes from './routes/order.route.js';
+import userRoutes from './routes/user.route.js';
+import authRoutes from './routes/auth.route.js';
+import infoRoutes from './routes/info.route.js';
+import companyRoutes from './routes/company.route.js';
+import errorHandler from './middlewares/error-handler.js';
+import { logger } from './helpers/logger.js';
+import path from 'path';
 
+const __dirname = path.resolve();
 const app = express();
 
 process.on("uncaughtException", (error) => {
-    logger.error(error.message, error);
+    logger.log(error.message, error);
 });
 process.on("unhandledRejection", (error) => {
     throw error;
@@ -73,8 +75,8 @@ const normalizePort = val => {
   
 
 // Express Config Settings
-app.use(express.json());
-app.use(express.urlencoded({extended: true}));
+app.use(json());
+app.use(urlencoded({extended: true}));
 app.use(helmet());
 app.use((req,res,next) => {
     res.setHeader('Access-Control-Allow-Origin','*');
@@ -83,7 +85,7 @@ app.use((req,res,next) => {
     next();
 });
 
-app.use("/", express.static(path.join(__dirname, "hisaab")));
+app.use('/', express.static(join(__dirname, "hisaab")));
 
 // Routes
 app.use('/api/taxrates', taxRoutes);
@@ -95,12 +97,12 @@ app.use('/api/auth', authRoutes);
 app.use('/api/company', companyRoutes);
 app.use('/api/info', infoRoutes);
 app.use((req, res) => {
-  res.sendFile(path.join(__dirname, 'hisaab', 'index.html'));
+  res.sendFile(join(__dirname, 'hisaab', 'index.html'));
 });
 
 app.use(errorHandler);
 
-const server = http.createServer(app);
+const server = createServer(app);
 server.on("error", onError);
 server.on("listening", onListening);
 server.listen(port);

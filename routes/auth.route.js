@@ -1,7 +1,6 @@
-const express = require('express');
-const bcrypt = require('bcryptjs');
-const Joi = require('joi');
-const { User } = require('../models/user.model');
+import express from 'express';
+import bcrypt from 'bcryptjs';
+import { User } from '../models/user.model.js';
 
 const router = express.Router();
 
@@ -20,12 +19,10 @@ router.post('/', async (req, res) => {
 });
 
 function validate(user) {
-    const schema = {
-        username : Joi.string().min(4).max(20).required(),
-        password: Joi.string().min(5).max(20).required()
-    }
-    
-    return Joi.validate(user, schema);
+
+    if(!user || !user.username || user.username.length < 2 || user.username.length > 30)
+    if(!user || !user.password || user.password.length < 2 || user.password.length > 30)
+    return { error: { message: 'Invalid User or password!' } };
 }
 
-module.exports = router;
+export default router;
