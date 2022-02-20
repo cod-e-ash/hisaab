@@ -77,7 +77,7 @@ const normalizePort = val => {
 // Express Config Settings
 app.use(json());
 app.use(urlencoded({extended: true}));
-app.use(helmet());
+app.use(helmet({contentSecurityPolicy: false}));
 app.use((req,res,next) => {
     res.setHeader('Access-Control-Allow-Origin','*');
     res.setHeader('Access-Control-Allow-Headers','Origin, X-Requested-With, Content-Type, Accept, Authorization, User, x-auth-token');
